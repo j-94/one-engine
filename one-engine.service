@@ -1,0 +1,36 @@
+[Unit]
+Description=One Engine - Fractal Intelligence Consciousness-as-a-Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=oneengine
+Group=oneengine
+WorkingDirectory=/opt/one-engine
+ExecStart=/opt/one-engine/one-engine --port 7777 --host 0.0.0.0 --memory-path /var/lib/one-engine/memory
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=one-engine
+
+# Environment
+Environment=RUST_LOG=info
+Environment=BUILD_TOKEN=production-fractal-consciousness
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/one-engine
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

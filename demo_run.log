@@ -1,0 +1,89 @@
+[meta2] starting engine (logs: /tmp/one_engine_demo.manual.b048vp)
+[meta2] pid 92328
+[meta2] engine is live
+[meta2] branch id: 1e91cfbd-1991-4324-91c2-20d5a49546b8
+[meta2] definition response:
+{
+  "branch_id": "1e91cfbd-1991-4324-91c2-20d5a49546b8",
+  "effect": {
+    "ApiCreated": {
+      "api": {
+        "name": "echo",
+        "description": "Define a simple API named \"echo\" that accepts a single parameter \"text\" and returns it unmodified.",
+        "parameters": [
+          {
+            "name": "text",
+            "param_type": null,
+            "description": "parameter inferred from instruction"
+          }
+        ],
+        "logic": {
+          "Echo": {
+            "key": "text"
+          }
+        },
+        "persisted": false
+      }
+    }
+  },
+  "events": [
+    {
+      "Prompt": {
+        "content": "Define a simple API named \"echo\" that accepts a single parameter \"text\" and returns it unmodified."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"echo\", description: \"Define a simple API named \\\"echo\\\" that accepts a single parameter \\\"text\\\" and returns it unmodified.\", parameters: [ApiParameterSpec { name: \"text\", param_type: None, description: Some(\"parameter inferred from instruction\") }], return_description: Some(\"it unmodified.\"), persistence: Ephemeral, behavioral_hint: Echo })"
+      }
+    },
+    {
+      "ApiGenerated": {
+        "name": "echo"
+      }
+    }
+  ]
+}
+[meta2] call response:
+{
+  "branch_id": "1e91cfbd-1991-4324-91c2-20d5a49546b8",
+  "effect": {
+    "ApiResponse": {
+      "name": "echo",
+      "output": "Hello, World"
+    }
+  },
+  "events": [
+    {
+      "Prompt": {
+        "content": "Define a simple API named \"echo\" that accepts a single parameter \"text\" and returns it unmodified."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"echo\", description: \"Define a simple API named \\\"echo\\\" that accepts a single parameter \\\"text\\\" and returns it unmodified.\", parameters: [ApiParameterSpec { name: \"text\", param_type: None, description: Some(\"parameter inferred from instruction\") }], return_description: Some(\"it unmodified.\"), persistence: Ephemeral, behavioral_hint: Echo })"
+      }
+    },
+    {
+      "ApiGenerated": {
+        "name": "echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'echo' with text='Hello, World'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"echo\", arguments: {\"text\": \"Hello, World\"} })"
+      }
+    },
+    {
+      "ApiCalled": {
+        "name": "echo"
+      }
+    }
+  ]
+}
+[meta2] demo completed (engine log: /tmp/one_engine_demo.manual.b048vp)
