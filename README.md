@@ -44,10 +44,10 @@ sudo ./deploy.sh
 - **Compile UTIR**: `POST /compile_and_run` - Direct UTIR compilation and execution
 
 ### Generative Chat Interface  
-- **Start Chat**: `POST /chat/sessions` - Begin API evolution conversation
-- **Send Message**: `POST /chat/sessions/{id}/messages` - Evolve schema through chat
-- **WebSocket**: `WS /chat/sessions/{id}/ws` - Real-time collaborative evolution
-- **Schema Preview**: `GET /chat/sessions/{id}/schema/preview` - Preview evolved API
+- **Start Conversation**: `POST /conversation` - Spawn a dedicated branch for API evolution
+- **Send Prompt**: `POST /conversation/{branch_id}/prompt` - Issue natural-language instructions
+- **Snapshot Branch**: `GET /conversation/{branch_id}/events` - Inspect prompts, intents, and generated APIs
+- **Genesis Smoke Test**: `POST /conversation/genesis` - Run the canonical echo demonstration
 
 ## 💡 Example Usage
 
@@ -60,27 +60,18 @@ curl -X POST http://localhost:7777/execute_goal \
 
 ### Start Conversational API Evolution
 ```bash
-# Start a chat session
-curl -X POST http://localhost:7777/chat/sessions \
+# Start a conversation branch
+curl -X POST http://localhost:7777/conversation \
   -H 'Content-Type: application/json' \
-  -d '{
-    "user_id": "developer",
-    "permissions": ["*"],
-    "preferences": {
-      "preferred_complexity": "Balanced",
-      "auto_apply_safe_changes": true,
-      "notification_preferences": "Important"
-    },
-    "expertise_level": "Expert"
-  }'
+  -d '{"label": "demo"}'
 
-# Chat with the consciousness to evolve the API
-curl -X POST http://localhost:7777/chat/sessions/{session_id}/messages \
+# Send natural language prompts
+curl -X POST http://localhost:7777/conversation/{branch_id}/prompt \
   -H 'Content-Type: application/json' \
-  -d '{
-    "content": "I need an endpoint for batch processing multiple goals",
-    "message_type": "Suggestion"
-  }'
+  -d '{"prompt": "Define an API named \"echo\" that accepts \"text\""}'
+
+# Snapshot the branch to review events and generated APIs
+curl -X GET http://localhost:7777/conversation/{branch_id}/events
 ```
 
 ### Direct UTIR Execution
