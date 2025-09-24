@@ -55,6 +55,11 @@ sudo ./deploy.sh
   ./scripts/log_conversation.sh "project-scanner" <branch_id> prompt.txt response.json receipts.txt
   ```
 - Visualise the entire history by serving the repo (e.g. `python -m http.server`) and opening `http://127.0.0.1:8000/conversation_canvas.html`.
+- Or launch everything in one command (starts engine, web server, opens browser):
+  ```bash
+  ./scripts/open_canvas.sh
+  ```
+  This spins up tmux sessions (`one_engine`, `one_engine_canvas_server`) if needed. Attach to them for live logs.
 
 ### Governance Automation
 Run the turnkey governance check (engine must be running locally):
