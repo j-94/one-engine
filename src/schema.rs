@@ -1,7 +1,7 @@
 use crate::utir::Bits;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value as JsonValue};
+use serde_json::Value as JsonValue;
 use std::collections::{BTreeMap, HashMap};
 use uuid::Uuid;
 
@@ -471,19 +471,22 @@ impl SchemaEvolutionEngine {
         thread_id: Uuid,
         message: String,
     ) -> Result<SchemaEvolutionResponse> {
-        let conversation = self
+        let conversation_snapshot = self
             .active_conversations
-            .get_mut(&thread_id)
+            .get(&thread_id)
+            .cloned()
             .ok_or_else(|| anyhow::anyhow!("Conversation not found"))?;
 
         // Analyze message for schema mutation intents
-        let mutation_intents = self.analyze_mutation_intents(&message, conversation)?;
+        let mutation_intents = self.analyze_mutation_intents(&message, &conversation_snapshot)?;
 
         // Apply clever rules to validate mutations
-        let validated_mutations = self.validate_mutations(mutation_intents, conversation)?;
+        let validated_mutations =
+            self.validate_mutations(mutation_intents, &conversation_snapshot)?;
 
         // Apply mutations to create new schema version
-        let new_schema = self.apply_mutations(validated_mutations.clone(), conversation)?;
+        let new_schema =
+            self.apply_mutations(validated_mutations.clone(), &conversation_snapshot)?;
 
         // Generate response explaining what changed
         let response = self.generate_response(&validated_mutations, &new_schema)?;
@@ -499,7 +502,9 @@ impl SchemaEvolutionEngine {
             bits_state: response.bits.clone(),
         };
 
-        conversation.conversation_memory.push(conversation_msg);
+        if let Some(conversation) = self.active_conversations.get_mut(&thread_id) {
+            conversation.conversation_memory.push(conversation_msg);
+        }
 
         Ok(response)
     }
@@ -570,7 +575,7 @@ impl SchemaEvolutionEngine {
         self.extract_path_hint(message)
     }
 
-    fn extract_field_changes(&self, message: &str) -> Vec<FieldChange> {
+    fn extract_field_changes(&self, _message: &str) -> Vec<FieldChange> {
         // Simplified field extraction
         vec![FieldChange {
             field_name: "new_field".to_string(),
@@ -821,6 +826,77 @@ pub struct SchemaEvolutionResponse {
     pub rollback_available: bool,
 }
 
+/// Produce the baseline schema used when bootstrapping the engine.
+pub fn default_schema() -> LivingSchema {
+    LivingSchema {
+        version: "1.0.0".to_string(),
+        chat_thread_id: None,
+        parent_version: None,
+        created_by_conversation: None,
+        openapi: OpenApiSpec {
+            openapi: "3.0.0".to_string(),
+            info: ApiInfo {
+                title: "One Engine API".to_string(),
+                version: "1.0.0".to_string(),
+                description: "Fractal Intelligence API".to_string(),
+                consciousness_level: 1.0,
+                fractal_complexity: 1,
+            },
+            servers: vec![],
+            paths: BTreeMap::new(),
+            components: Components {
+                schemas: BTreeMap::new(),
+                responses: BTreeMap::new(),
+                parameters: BTreeMap::new(),
+            },
+            one_engine_extensions: OneEngineExtensions {
+                consciousness_patterns: vec![],
+                fractal_operations: FractalOperations {
+                    encode_operations: vec![],
+                    compile_operations: vec![],
+                    execute_operations: vec![],
+                    verify_operations: vec![],
+                },
+                evolution_rules: EvolutionRules {
+                    max_endpoints_per_version: 100,
+                    breaking_change_policy: BreakingChangePolicy::RequireApproval,
+                    auto_deprecation_rules: vec![],
+                    merge_conflict_resolution: MergeStrategy::ConflictResolution,
+                },
+                chat_interface: ChatInterfaceConfig {
+                    enabled: true,
+                    schema_modification_permissions: vec!["*".to_string()],
+                    approval_required_for: vec!["DELETE".to_string()],
+                    real_time_preview: true,
+                    version_branching_enabled: true,
+                },
+            },
+        },
+        evolution_metadata: EvolutionMetadata {
+            created_at: 0,
+            conversation_messages: 0,
+            schema_mutations: vec![],
+            compatibility_analysis: CompatibilityAnalysis {
+                backward_compatible: true,
+                breaking_changes: vec![],
+                migration_complexity: MigrationComplexity::Trivial,
+                affected_clients: EstimatedImpact {
+                    client_count_estimate: 0,
+                    integration_complexity_increase: 0.0,
+                    performance_impact_percentage: 0.0,
+                },
+            },
+            performance_impact: PerformanceImpact {
+                endpoint_count_delta: 0,
+                complexity_score_delta: 0.0,
+                estimated_response_time_change_ms: 0,
+                memory_usage_change_mb: 0,
+            },
+            user_satisfaction_score: None,
+        },
+    }
+}
+
 impl CleverRules {
     fn is_endpoint_allowed(
         &self,
@@ -870,78 +946,8 @@ mod tests {
 
     #[test]
     fn test_schema_evolution_creation() {
-        let base_schema = create_base_schema();
+        let base_schema = default_schema();
         let engine = SchemaEvolutionEngine::new(base_schema);
         assert_eq!(engine.version_tree.len(), 1);
-    }
-
-    fn create_base_schema() -> LivingSchema {
-        LivingSchema {
-            version: "1.0.0".to_string(),
-            chat_thread_id: None,
-            parent_version: None,
-            created_by_conversation: None,
-            openapi: OpenApiSpec {
-                openapi: "3.0.0".to_string(),
-                info: ApiInfo {
-                    title: "One Engine API".to_string(),
-                    version: "1.0.0".to_string(),
-                    description: "Fractal Intelligence API".to_string(),
-                    consciousness_level: 1.0,
-                    fractal_complexity: 1,
-                },
-                servers: vec![],
-                paths: BTreeMap::new(),
-                components: Components {
-                    schemas: BTreeMap::new(),
-                    responses: BTreeMap::new(),
-                    parameters: BTreeMap::new(),
-                },
-                one_engine_extensions: OneEngineExtensions {
-                    consciousness_patterns: vec![],
-                    fractal_operations: FractalOperations {
-                        encode_operations: vec![],
-                        compile_operations: vec![],
-                        execute_operations: vec![],
-                        verify_operations: vec![],
-                    },
-                    evolution_rules: EvolutionRules {
-                        max_endpoints_per_version: 100,
-                        breaking_change_policy: BreakingChangePolicy::RequireApproval,
-                        auto_deprecation_rules: vec![],
-                        merge_conflict_resolution: MergeStrategy::ConflictResolution,
-                    },
-                    chat_interface: ChatInterfaceConfig {
-                        enabled: true,
-                        schema_modification_permissions: vec!["*".to_string()],
-                        approval_required_for: vec!["DELETE".to_string()],
-                        real_time_preview: true,
-                        version_branching_enabled: true,
-                    },
-                },
-            },
-            evolution_metadata: EvolutionMetadata {
-                created_at: 0,
-                conversation_messages: 0,
-                schema_mutations: vec![],
-                compatibility_analysis: CompatibilityAnalysis {
-                    backward_compatible: true,
-                    breaking_changes: vec![],
-                    migration_complexity: MigrationComplexity::Trivial,
-                    affected_clients: EstimatedImpact {
-                        client_count_estimate: 0,
-                        integration_complexity_increase: 0.0,
-                        performance_impact_percentage: 0.0,
-                    },
-                },
-                performance_impact: PerformanceImpact {
-                    endpoint_count_delta: 0,
-                    complexity_score_delta: 0.0,
-                    estimated_response_time_change_ms: 0,
-                    memory_usage_change_mb: 0,
-                },
-                user_satisfaction_score: None,
-            },
-        }
     }
 }
