@@ -56,6 +56,15 @@ sudo ./deploy.sh
   ```
 - Visualise the entire history by serving the repo (e.g. `python -m http.server`) and opening `http://127.0.0.1:8000/conversation_canvas.html`.
 
+### Governance Automation
+Run the turnkey governance check (engine must be running locally):
+
+```bash
+./scripts/governance_check.sh
+```
+
+The script asks the engine to generate and execute a `governance_check` API that runs `cargo fmt`, `cargo clippy`, `cargo test`, verifies `conversation.md`, and stores a detailed receipt under `logs/`. Results are summarised in the generated report and appended to `conversation.md` for easy review.
+
 ## 💡 Example Usage
 
 ### Execute a Goal
