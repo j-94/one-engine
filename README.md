@@ -49,6 +49,13 @@ sudo ./deploy.sh
 - **Snapshot Branch**: `GET /conversation/{branch_id}/events` - Inspect prompts, intents, and generated APIs
 - **Genesis Smoke Test**: `POST /conversation/genesis` - Run the canonical echo demonstration
 
+#### Conversation Canvas & Receipts
+- Append each exchange to `conversation.md` with:
+  ```bash
+  ./scripts/log_conversation.sh "project-scanner" <branch_id> prompt.txt response.json receipts.txt
+  ```
+- Visualise the entire history by serving the repo (e.g. `python -m http.server`) and opening `http://127.0.0.1:8000/conversation_canvas.html`.
+
 ## 💡 Example Usage
 
 ### Execute a Goal
