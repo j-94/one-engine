@@ -1,19 +1,43 @@
 mod api;
 mod branch;
+mod chat;
 mod compiler;
 mod conversation;
 mod memory;
 mod parser;
+mod schema;
 mod utir;
 
 use anyhow::Result;
 use api::{create_router, EngineState};
+use chat::GenerativeChatEngine;
+use schema::{default_schema, SchemaEvolutionEngine};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::fmt::init as init_tracing;
+
+#[derive(Clone)]
+pub struct AppState {
+    engine: Arc<EngineState>,
+    chat: Arc<GenerativeChatEngine>,
+}
+
+impl AppState {
+    pub fn new(engine: Arc<EngineState>, chat: Arc<GenerativeChatEngine>) -> Self {
+        Self { engine, chat }
+    }
+
+    pub fn engine(&self) -> Arc<EngineState> {
+        Arc::clone(&self.engine)
+    }
+
+    pub fn chat(&self) -> Arc<GenerativeChatEngine> {
+        Arc::clone(&self.chat)
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -43,8 +67,14 @@ async fn main() -> Result<()> {
         }
     }
 
-    let state = Arc::new(EngineState::new(ledger_path, allowed_domains, api_key));
-    let app = create_router(state);
+    let engine_state = Arc::new(EngineState::new(ledger_path, allowed_domains, api_key));
+
+    let base_schema = default_schema();
+    let schema_engine = SchemaEvolutionEngine::new(base_schema);
+    let chat_engine = Arc::new(GenerativeChatEngine::new(schema_engine));
+
+    let app_state = Arc::new(AppState::new(engine_state, chat_engine));
+    let app = create_router(Arc::clone(&app_state));
 
     let listener = TcpListener::bind(bind_addr).await?;
     info!("🧠 One Engine running on http://{bind_addr}");

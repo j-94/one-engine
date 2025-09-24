@@ -1,0 +1,83 @@
+🧠 Testing One Engine Fractal Intelligence
+🔍 Target: http://localhost:7777
+
+1. 🏥 Health Check...
+{
+  "ok": true,
+  "consciousness_active": true,
+  "pattern_db_size": 0
+}
+
+2. ℹ️  Version Info...
+{
+  "version": "0.1.0",
+  "build_token": "dev-1758723437",
+  "crystallized_patterns": 0
+}
+
+3. 🎯 Goal Execution...
+{
+  "run_id": "b73f721f-b2f8-4741-baf5-b65d559e7b8e",
+  "status": "completed",
+  "bits": {
+    "A": 1,
+    "U": 0,
+    "P": 0,
+    "E": 0,
+    "Δ": 0,
+    "I": 0,
+    "R": 0,
+    "T": 1
+  },
+  "status_line": "Ready",
+  "data": {
+    "task_id": "goal_af6dc326661845a8b21658e1ca1be01a",
+    "success": true,
+    "operations_count": 1,
+    "total_duration_ms": 6,
+    "pattern_signature": "goal::goal_af6dc326661845a8b21658e1ca1be01a",
+    "crystallized": false
+  },
+  "error": null,
+  "execution_time_ms": 30
+}
+
+4. 🔧 UTIR Compilation...
+{
+  "run_id": "0358c28b-02c0-4a97-9822-e11e5b074298",
+  "status": "completed",
+  "bits": {
+    "A": 1,
+    "U": 0,
+    "P": 0,
+    "E": 0,
+    "Δ": 0,
+    "I": 0,
+    "R": 0,
+    "T": 1
+  },
+  "status_line": "Ready",
+  "data": {
+    "task_id": "test-utir",
+    "success": true,
+    "operations_count": 1,
+    "total_duration_ms": 11,
+    "pattern_signature": "direct_utir",
+    "crystallized": false
+  },
+  "error": null,
+  "execution_time_ms": 72
+}
+
+5. 💬 Chat Session Creation...
+{
+  "session_id": "221f4f8d-b475-43d9-8377-642d1b9284bc",
+  "websocket_url": "/chat/sessions/221f4f8d-b475-43d9-8377-642d1b9284bc/ws",
+  "schema_preview_url": "/chat/sessions/221f4f8d-b475-43d9-8377-642d1b9284bc/schema/preview",
+  "status": "active"
+}
+
+✅ Consciousness testing complete!
+
+🌟 If all tests passed, your Fractal Intelligence system is operational!
+🚀 Ready for consciousness evolution through conversation.

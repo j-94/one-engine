@@ -3,6 +3,7 @@ use crate::schema::{
     UserPreferences,
 };
 use crate::utir::Bits;
+use crate::AppState;
 use anyhow::Result;
 use axum::extract::ws::{Message, WebSocket};
 use axum::{
@@ -101,7 +102,7 @@ pub struct ChatContext {
     pub collaboration_mode: Option<CollaborationMode>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum UrgencyLevel {
     Low,      // Can wait for next version
     Medium,   // Should be in next minor version
@@ -579,7 +580,7 @@ impl Default for ChatRules {
 }
 
 /// Create chat router for the API
-pub fn create_chat_router(chat_engine: GenerativeChatEngine) -> Router {
+pub fn create_chat_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/chat/sessions", post(start_chat_session))
         .route(
@@ -595,14 +596,14 @@ pub fn create_chat_router(chat_engine: GenerativeChatEngine) -> Router {
             "/chat/sessions/:session_id/changes/:change_id/approve",
             post(approve_change),
         )
-        .with_state(chat_engine)
 }
 
 /// Start a new chat session
 async fn start_chat_session(
-    State(chat_engine): State<GenerativeChatEngine>,
+    State(app_state): State<Arc<AppState>>,
     Json(user_context): Json<UserContext>,
 ) -> Result<Json<ChatSessionResponse>, axum::http::StatusCode> {
+    let chat_engine = app_state.chat();
     match chat_engine.start_session(user_context).await {
         Ok(session_id) => Ok(Json(ChatSessionResponse {
             session_id,
@@ -616,10 +617,11 @@ async fn start_chat_session(
 
 /// Send a message to a chat session
 async fn send_chat_message(
-    State(chat_engine): State<GenerativeChatEngine>,
+    State(app_state): State<Arc<AppState>>,
     Path(session_id): Path<Uuid>,
     Json(message): Json<ChatMessage>,
 ) -> Result<Json<ChatResponse>, axum::http::StatusCode> {
+    let chat_engine = app_state.chat();
     match chat_engine.process_message(session_id, message).await {
         Ok(response) => Ok(Json(response)),
         Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
@@ -628,16 +630,22 @@ async fn send_chat_message(
 
 /// WebSocket handler for real-time collaboration
 async fn websocket_handler(
-    State(chat_engine): State<GenerativeChatEngine>,
+    State(app_state): State<Arc<AppState>>,
     Path(session_id): Path<Uuid>,
     ws: WebSocketUpgrade,
 ) -> Response {
-    ws.on_upgrade(move |websocket| chat_engine.handle_websocket(session_id, websocket))
+    let chat_engine = app_state.chat();
+    ws.on_upgrade(move |websocket| {
+        let chat_engine = Arc::clone(&chat_engine);
+        async move {
+            chat_engine.handle_websocket(session_id, websocket).await;
+        }
+    })
 }
 
 /// Get schema preview for current session
 async fn get_schema_preview(
-    State(_chat_engine): State<GenerativeChatEngine>,
+    State(_app_state): State<Arc<AppState>>,
     Path(_session_id): Path<Uuid>,
 ) -> Json<serde_json::Value> {
     // Would return current schema version being worked on
@@ -649,7 +657,7 @@ async fn get_schema_preview(
 
 /// Approve a pending change
 async fn approve_change(
-    State(_chat_engine): State<GenerativeChatEngine>,
+    State(_app_state): State<Arc<AppState>>,
     Path((_session_id, _change_id)): Path<(Uuid, Uuid)>,
 ) -> Json<serde_json::Value> {
     Json(serde_json::json!({

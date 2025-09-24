@@ -1,8 +1,10 @@
 use crate::branch::{BranchManager, BranchState};
+use crate::chat::create_chat_router;
 use crate::compiler::UtirCompiler;
 use crate::conversation::{ConversationEffect, ConversationService};
 use crate::memory::MemorySystem;
 use crate::utir::{parse_utir, Bits};
+use crate::AppState;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -34,13 +36,14 @@ fn _assert_state_bounds() {
     assert_send_sync::<UtirCompiler>();
     assert_send_sync::<BranchManager>();
     assert_send_sync::<ConversationService>();
+    assert_send_sync::<AppState>();
 }
 
 #[allow(dead_code)]
-fn _assert_execute_goal_future_send(state: Arc<EngineState>) {
+fn _assert_execute_goal_future_send(app_state: Arc<AppState>) {
     fn assert_send<F: Send>(_fut: F) {}
     let fut = execute_goal(
-        State(state),
+        State(app_state),
         Json(ExecuteGoalRequest {
             goal: String::new(),
         }),
@@ -119,7 +122,9 @@ impl EngineState {
 }
 
 /// Create the API router
-pub fn create_router(state: Arc<EngineState>) -> Router {
+pub fn create_router(app_state: Arc<AppState>) -> Router {
+    let chat_router = create_chat_router();
+
     Router::new()
         .route("/healthz", get(health_check))
         .route("/version", get(version_info))
@@ -135,13 +140,15 @@ pub fn create_router(state: Arc<EngineState>) -> Router {
         .route("/execute_goal", post(execute_goal))
         .route("/compile_and_run", post(compile_and_run))
         .route("/conversation/genesis", post(run_genesis_conversation))
+        .merge(chat_router)
         .layer(CorsLayer::permissive())
-        .with_state(state)
+        .with_state(app_state)
 }
 
 /// Health check
-async fn health_check(State(state): State<Arc<EngineState>>) -> Json<HealthStatus> {
-    let memory = state.memory.lock().await;
+async fn health_check(State(app_state): State<Arc<AppState>>) -> Json<HealthStatus> {
+    let engine = app_state.engine();
+    let memory = engine.memory.lock().await;
 
     Json(HealthStatus {
         ok: true,
@@ -151,8 +158,9 @@ async fn health_check(State(state): State<Arc<EngineState>>) -> Json<HealthStatu
 }
 
 /// Version information
-async fn version_info(State(state): State<Arc<EngineState>>) -> Json<VersionInfo> {
-    let memory = state.memory.lock().await;
+async fn version_info(State(app_state): State<Arc<AppState>>) -> Json<VersionInfo> {
+    let engine = app_state.engine();
+    let memory = engine.memory.lock().await;
 
     Json(VersionInfo {
         version: env!("CARGO_PKG_VERSION").to_string(),
@@ -163,11 +171,13 @@ async fn version_info(State(state): State<Arc<EngineState>>) -> Json<VersionInfo
 
 /// Execute a high-level goal
 async fn execute_goal(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
     Json(request): Json<ExecuteGoalRequest>,
 ) -> Json<EngineResponse<ExecutionResult>> {
     let start_time = std::time::Instant::now();
     let run_id = Uuid::new_v4();
+
+    let engine_state = app_state.engine();
 
     info!("Executing goal: {} (run_id: {})", request.goal, run_id);
 
@@ -211,7 +221,7 @@ operations:
         }
     };
 
-    let mut compiler = match UtirCompiler::new(state.allowed_domains.clone()) {
+    let mut compiler = match UtirCompiler::new(engine_state.allowed_domains.clone()) {
         Ok(c) => c,
         Err(e) => {
             let bits = Bits {
@@ -319,11 +329,13 @@ operations:
 
 /// Compile and run UTIR directly
 async fn compile_and_run(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
     Json(request): Json<CompileAndRunRequest>,
 ) -> Json<EngineResponse<ExecutionResult>> {
     let start_time = std::time::Instant::now();
     let run_id = Uuid::new_v4();
+
+    let engine_state = app_state.engine();
 
     let utir_doc = match parse_utir(&request.utir) {
         Ok(doc) => doc,
@@ -355,7 +367,7 @@ async fn compile_and_run(
         utir_doc.task_id, run_id
     );
 
-    let mut compiler = match UtirCompiler::new(state.allowed_domains.clone()) {
+    let mut compiler = match UtirCompiler::new(engine_state.allowed_domains.clone()) {
         Ok(c) => c,
         Err(e) => {
             let bits = Bits {
@@ -466,9 +478,10 @@ struct GenesisResponse {
 }
 
 async fn run_genesis_conversation(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<GenesisResponse>, StatusCode> {
-    let conversation = state.conversation.clone();
+    let engine_state = app_state.engine();
+    let conversation = engine_state.conversation.clone();
     let branch_id = conversation
         .start_session(Some("genesis".to_string()))
         .await;
@@ -495,7 +508,7 @@ async fn run_genesis_conversation(
         _ => return Err(StatusCode::BAD_REQUEST),
     };
 
-    let events = state
+    let events = engine_state
         .branches
         .snapshot(branch_id)
         .await
@@ -521,11 +534,12 @@ struct StartConversationResponse {
 }
 
 async fn start_conversation(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
     Json(request): Json<StartConversationRequest>,
 ) -> Result<Json<StartConversationResponse>, StatusCode> {
     let label = request.label.clone();
-    let branch_id = state.conversation.start_session(label).await;
+    let engine_state = app_state.engine();
+    let branch_id = engine_state.conversation.start_session(label).await;
 
     Ok(Json(StartConversationResponse { branch_id }))
 }
@@ -543,17 +557,18 @@ struct ConversationPromptResponse {
 }
 
 async fn submit_conversation_prompt(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
     Path(branch_id): Path<Uuid>,
     Json(request): Json<ConversationPromptRequest>,
 ) -> Result<Json<ConversationPromptResponse>, StatusCode> {
-    let effect = state
+    let engine_state = app_state.engine();
+    let effect = engine_state
         .conversation
         .process_prompt(branch_id, &request.prompt)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let events = state
+    let events = engine_state
         .branches
         .snapshot(branch_id)
         .await
@@ -568,10 +583,11 @@ async fn submit_conversation_prompt(
 }
 
 async fn get_conversation_events(
-    State(state): State<Arc<EngineState>>,
+    State(app_state): State<Arc<AppState>>,
     Path(branch_id): Path<Uuid>,
 ) -> Result<Json<BranchState>, StatusCode> {
-    state
+    let engine_state = app_state.engine();
+    engine_state
         .branches
         .snapshot(branch_id)
         .await
