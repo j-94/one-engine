@@ -3,6 +3,7 @@ mod branch;
 mod chat;
 mod compiler;
 mod conversation;
+mod events;
 mod memory;
 mod parser;
 mod schema;
