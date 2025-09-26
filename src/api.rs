@@ -2,7 +2,7 @@ use crate::branch::{BranchManager, BranchState};
 use crate::compiler::UtirCompiler;
 use crate::conversation::{ConversationEffect, ConversationService};
 use crate::memory::MemorySystem;
-use crate::utir::{parse_utir, Bits};
+use crate::utir::{parse_utir, Bits, OperationResult};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -81,6 +81,9 @@ pub struct ExecutionResult {
     pub total_duration_ms: u64,
     pub pattern_signature: String,
     pub crystallized: bool,
+    pub operations: Vec<OperationResult>,
+    pub total_tokens_estimate: u64,
+    pub total_cost_estimate_usd: f64,
 }
 
 /// Version information
@@ -264,6 +267,17 @@ operations:
 
     let success = results.iter().all(|r| r.success);
     let total_duration = results.iter().map(|r| r.duration_ms).sum();
+    let total_tokens = results
+        .iter()
+        .filter_map(|r| r.metadata.get("tokens"))
+        .filter_map(|t| t.parse::<u64>().ok())
+        .sum();
+    let total_cost = results
+        .iter()
+        .filter_map(|r| r.metadata.get("cost_usd"))
+        .filter_map(|c| c.parse::<f64>().ok())
+        .sum();
+    let operations = results;
 
     // TODO: finish wiring the memory system once asynchronous persistence is ready
     let pattern_signature = format!("goal::{}", utir_doc.task_id);
@@ -296,10 +310,13 @@ operations:
     let result = ExecutionResult {
         task_id: utir_doc.task_id.clone(),
         success,
-        operations_count: results.len() as u32,
+        operations_count: operations.len() as u32,
         total_duration_ms: total_duration,
         pattern_signature,
         crystallized,
+        operations,
+        total_tokens_estimate: total_tokens,
+        total_cost_estimate_usd: total_cost,
     };
 
     Json(EngineResponse {
@@ -408,6 +425,17 @@ async fn compile_and_run(
 
     let success = results.iter().all(|r| r.success);
     let total_duration = results.iter().map(|r| r.duration_ms).sum();
+    let total_tokens = results
+        .iter()
+        .filter_map(|r| r.metadata.get("tokens"))
+        .filter_map(|t| t.parse::<u64>().ok())
+        .sum();
+    let total_cost = results
+        .iter()
+        .filter_map(|r| r.metadata.get("cost_usd"))
+        .filter_map(|c| c.parse::<f64>().ok())
+        .sum();
+    let operations = results;
 
     let final_bits = if success {
         Bits {
@@ -436,10 +464,13 @@ async fn compile_and_run(
     let result = ExecutionResult {
         task_id: utir_doc.task_id.clone(),
         success,
-        operations_count: results.len() as u32,
+        operations_count: operations.len() as u32,
         total_duration_ms: total_duration,
         pattern_signature: "direct_utir".to_string(),
         crystallized: false,
+        operations,
+        total_tokens_estimate: total_tokens,
+        total_cost_estimate_usd: total_cost,
     };
 
     Json(EngineResponse {

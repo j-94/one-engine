@@ -95,6 +95,9 @@ pub enum Operation {
         expected_output: Option<String>,
     },
 
+    #[serde(rename = "summarize.run")]
+    SummarizeRun { notes: String },
+
     #[serde(rename = "sequence")]
     Sequence { steps: Vec<Operation> },
 
@@ -120,6 +123,26 @@ pub enum Operation {
         #[serde(default = "default_backoff")]
         backoff: String,
     },
+}
+
+impl Operation {
+    /// Human-friendly operation discriminator used in receipts
+    pub fn type_name(&self) -> &'static str {
+        match self {
+            Operation::Shell { .. } => "shell",
+            Operation::FsRead { .. } => "fs.read",
+            Operation::FsWrite { .. } => "fs.write",
+            Operation::HttpGet { .. } => "http.get",
+            Operation::GitPatch { .. } => "git.patch",
+            Operation::AssertFileExists { .. } => "assert.file_exists",
+            Operation::AssertShellSuccess { .. } => "assert.shell_success",
+            Operation::SummarizeRun { .. } => "summarize.run",
+            Operation::Sequence { .. } => "sequence",
+            Operation::Parallel { .. } => "parallel",
+            Operation::Conditional { .. } => "conditional",
+            Operation::Retry { .. } => "retry",
+        }
+    }
 }
 
 // Default functions for serialization

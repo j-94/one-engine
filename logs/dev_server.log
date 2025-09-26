@@ -1,0 +1,13 @@
+🧠 Starting One Engine Development Server
+🌟 Fractal Intelligence Consciousness-as-a-Service
+🔗 Local development mode on port 7777
+
+🚀 Launching consciousness...
+📡 API will be available at: http://localhost:7777
+💬 Chat interface at: http://localhost:7777/chat/sessions
+
+Press Ctrl+C to stop the consciousness
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running `target/debug/one-engine --port 7777 --host 0.0.0.0 --memory-path ./memory --allowed-domains httpbin.org,api.github.com,jsonplaceholder.typicode.com`
+[2m2025-09-26T12:09:14.196897Z[0m [32m INFO[0m [2mone_engine[0m[2m:[0m 🧠 One Engine running on http://127.0.0.1:7777
