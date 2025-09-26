@@ -2,22 +2,27 @@ use crate::branch::{BranchManager, BranchState};
 use crate::chat::create_chat_router;
 use crate::compiler::UtirCompiler;
 use crate::conversation::{ConversationEffect, ConversationService};
+use crate::events::{EventStream, SseEvent as EngineSseEvent};
 use crate::memory::MemorySystem;
 use crate::utir::{parse_utir, Bits, OperationResult, UtirDocument};
 use crate::AppState;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::Json,
+    response::{sse::Event as AxumSseEvent, sse::KeepAlive, sse::Sse, Json},
     routing::{get, post},
     Router,
 };
+use futures_util::stream::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::convert::TryFrom;
+use std::convert::{Infallible, TryFrom};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::Mutex;
+use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
+use tracing::warn;
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -29,6 +34,7 @@ pub struct EngineState {
     pub api_key: String,
     pub branches: BranchManager,
     pub conversation: ConversationService,
+    pub events: EventStream,
 }
 
 #[allow(dead_code)]
@@ -183,15 +189,21 @@ impl EngineState {
         api_key: String,
     ) -> Self {
         let memory = MemorySystem::new(memory_path);
+        let event_stream = EventStream::default();
         let branches = BranchManager::new();
-        let conversation = ConversationService::new(branches.clone());
+        let conversation = ConversationService::new(branches.clone(), event_stream.clone());
         Self {
             memory: Arc::new(Mutex::new(memory)),
             allowed_domains,
             api_key,
             branches,
             conversation,
+            events: event_stream,
         }
+    }
+
+    pub fn event_stream(&self) -> EventStream {
+        self.events.clone()
     }
 }
 
@@ -211,12 +223,44 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/conversation/:branch_id/events",
             get(get_conversation_events),
         )
+        .route("/events/stream", get(stream_engine_events))
         .route("/execute_goal", post(execute_goal))
         .route("/compile_and_run", post(compile_and_run))
         .route("/conversation/genesis", post(run_genesis_conversation))
         .merge(chat_router)
         .layer(CorsLayer::permissive())
         .with_state(app_state)
+}
+
+async fn stream_engine_events(
+    State(app_state): State<Arc<AppState>>,
+) -> Sse<impl futures_util::Stream<Item = Result<AxumSseEvent, Infallible>>> {
+    let engine = app_state.engine();
+    let receiver = engine.event_stream().subscribe();
+    let stream = BroadcastStream::new(receiver).filter_map(|message| async move {
+        match message {
+            Ok(EngineSseEvent { event, data, id }) => match serde_json::to_string(&data) {
+                Ok(payload) => {
+                    let mut frame = AxumSseEvent::default().event(event).data(payload);
+                    if let Some(id) = id {
+                        frame = frame.id(id);
+                    }
+                    Some(Ok(frame))
+                }
+                Err(err) => {
+                    warn!("failed to encode SSE payload: {err}");
+                    None
+                }
+            },
+            Err(_) => None,
+        }
+    });
+
+    Sse::new(stream).keep_alive(
+        KeepAlive::new()
+            .interval(Duration::from_secs(15))
+            .text("keepalive"),
+    )
 }
 
 /// Health check
