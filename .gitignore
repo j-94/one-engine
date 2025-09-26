@@ -1,1 +1,4 @@
 /target
+.graphlogue/
+DELIVERABLES.md
+__pycache__/
