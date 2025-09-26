@@ -3,7 +3,7 @@ use crate::chat::create_chat_router;
 use crate::compiler::UtirCompiler;
 use crate::conversation::{ConversationEffect, ConversationService};
 use crate::memory::MemorySystem;
-use crate::utir::{parse_utir, Bits};
+use crate::utir::{parse_utir, Bits, OperationResult, UtirDocument};
 use crate::AppState;
 use axum::{
     extract::{Path, State},
@@ -13,6 +13,8 @@ use axum::{
     Router,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
@@ -84,6 +86,78 @@ pub struct ExecutionResult {
     pub total_duration_ms: u64,
     pub pattern_signature: String,
     pub crystallized: bool,
+    pub token_estimate_total: u32,
+    pub operations: Vec<OperationReceipt>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OperationReceipt {
+    pub index: usize,
+    pub phase: String,
+    pub op: String,
+    pub operation_type: String,
+    pub descriptor: String,
+    pub status: String,
+    pub success: bool,
+    pub duration_ms: u64,
+    pub output: String,
+    pub output_truncated: bool,
+    pub bits: Bits,
+    pub metadata: HashMap<String, String>,
+    pub token_estimate: u32,
+}
+
+fn build_operation_receipts(
+    doc: &UtirDocument,
+    results: &[OperationResult],
+) -> (Vec<OperationReceipt>, u32) {
+    const MAX_OUTPUT_BYTES: usize = 2048;
+
+    let mut total_tokens = 0;
+    let mut receipts = Vec::with_capacity(results.len());
+
+    for (index, (operation, result)) in doc.operations.iter().zip(results.iter()).enumerate() {
+        let descriptor = operation.descriptor();
+        let mut output = result.output.clone();
+        let truncated = if output.len() > MAX_OUTPUT_BYTES {
+            output.truncate(MAX_OUTPUT_BYTES);
+            output.push('…');
+            true
+        } else {
+            false
+        };
+
+        let token_estimate = estimate_tokens(&descriptor, &result.output);
+        total_tokens += token_estimate;
+
+        receipts.push(OperationReceipt {
+            index,
+            phase: "execution".to_string(),
+            op: format!("step-{}", index + 1),
+            operation_type: operation.kind().to_string(),
+            descriptor,
+            status: if result.success {
+                "success".to_string()
+            } else {
+                "failed".to_string()
+            },
+            success: result.success,
+            duration_ms: result.duration_ms,
+            output,
+            output_truncated: truncated,
+            bits: result.bits.clone(),
+            metadata: result.metadata.clone(),
+            token_estimate,
+        });
+    }
+
+    (receipts, total_tokens)
+}
+
+fn estimate_tokens(descriptor: &str, output: &str) -> u32 {
+    let total_len = descriptor.len() + output.len();
+    let total_len = u32::try_from(total_len).unwrap_or(u32::MAX);
+    total_len.div_ceil(4)
 }
 
 /// Version information
@@ -275,9 +349,21 @@ operations:
     let success = results.iter().all(|r| r.success);
     let total_duration = results.iter().map(|r| r.duration_ms).sum();
 
-    // TODO: finish wiring the memory system once asynchronous persistence is ready
-    let pattern_signature = format!("goal::{}", utir_doc.task_id);
-    let crystallized = false;
+    let (operations, token_estimate_total) = build_operation_receipts(&utir_doc, &results);
+
+    let (pattern_signature, crystallized) = {
+        let mut memory = engine_state.memory.lock().await;
+        match memory.record_execution(&utir_doc, &results).await {
+            Ok(ghost) => {
+                let should_crystallize = ghost.crystallization_score > memory.ghost_threshold;
+                (ghost.pattern_signature, should_crystallize)
+            }
+            Err(e) => {
+                error!("Failed to record execution: {}", e);
+                (format!("goal::{}", utir_doc.task_id), false)
+            }
+        }
+    };
 
     let final_bits = if success {
         Bits {
@@ -310,6 +396,8 @@ operations:
         total_duration_ms: total_duration,
         pattern_signature,
         crystallized,
+        token_estimate_total,
+        operations,
     };
 
     Json(EngineResponse {
@@ -421,6 +509,22 @@ async fn compile_and_run(
     let success = results.iter().all(|r| r.success);
     let total_duration = results.iter().map(|r| r.duration_ms).sum();
 
+    let (operations, token_estimate_total) = build_operation_receipts(&utir_doc, &results);
+
+    let (pattern_signature, crystallized) = {
+        let mut memory = engine_state.memory.lock().await;
+        match memory.record_execution(&utir_doc, &results).await {
+            Ok(ghost) => {
+                let should_crystallize = ghost.crystallization_score > memory.ghost_threshold;
+                (ghost.pattern_signature, should_crystallize)
+            }
+            Err(e) => {
+                error!("Failed to record execution: {}", e);
+                ("direct_utir".to_string(), false)
+            }
+        }
+    };
+
     let final_bits = if success {
         Bits {
             alignment: 1,
@@ -450,8 +554,10 @@ async fn compile_and_run(
         success,
         operations_count: results.len() as u32,
         total_duration_ms: total_duration,
-        pattern_signature: "direct_utir".to_string(),
-        crystallized: false,
+        pattern_signature,
+        crystallized,
+        token_estimate_total,
+        operations,
     };
 
     Json(EngineResponse {

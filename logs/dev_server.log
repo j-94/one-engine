@@ -1,0 +1,104 @@
+🧠 Starting One Engine Development Server
+🌟 Fractal Intelligence Consciousness-as-a-Service
+🔗 Local development mode on port 7777
+
+🚀 Launching consciousness...
+📡 API will be available at: http://localhost:7777
+💬 Chat interface at: http://localhost:7777/chat/sessions
+
+Press Ctrl+C to stop the consciousness
+
+   Compiling one-engine v0.1.0 (/root/repo)
+warning: unused imports: `ComplexityLevel`, `NotificationLevel`, and `UserPreferences`
+ --> src/chat.rs:2:5
+  |
+2 |     ComplexityLevel, ExpertiseLevel, NotificationLevel, SchemaEvolutionEngine, UserContext,
+  |     ^^^^^^^^^^^^^^^                  ^^^^^^^^^^^^^^^^^
+3 |     UserPreferences,
+  |     ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: variants `SchemaUpdated` and `CollaborationStarted` are never constructed
+   --> src/chat.rs:220:5
+    |
+215 | pub enum WebSocketResponse {
+    |          ----------------- variants in this enum
+...
+220 |     SchemaUpdated {
+    |     ^^^^^^^^^^^^^
+...
+227 |     CollaborationStarted {
+    |     ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `WebSocketResponse` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` on by default
+
+warning: fields `endpoint_hint` and `field_changes` are never read
+   --> src/schema.rs:802:9
+    |
+801 |     ModifyResponse {
+    |     -------------- fields in this variant
+802 |         endpoint_hint: Option<String>,
+    |         ^^^^^^^^^^^^^
+803 |         field_changes: Vec<FieldChange>,
+    |         ^^^^^^^^^^^^^
+    |
+    = note: `MutationIntent` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `endpoint_hint` and `reason` are never read
+   --> src/schema.rs:806:9
+    |
+805 |     DeprecateEndpoint {
+    |     ----------------- fields in this variant
+806 |         endpoint_hint: Option<String>,
+    |         ^^^^^^^^^^^^^
+807 |         reason: String,
+    |         ^^^^^^
+    |
+    = note: `MutationIntent` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `field_name`, `field_type`, `required`, and `description` are never read
+   --> src/schema.rs:813:9
+    |
+812 | pub struct FieldChange {
+    |            ----------- fields in this struct
+813 |     pub field_name: String,
+    |         ^^^^^^^^^^
+814 |     pub field_type: String,
+    |         ^^^^^^^^^^
+815 |     pub required: bool,
+    |         ^^^^^^^^
+816 |     pub description: String,
+    |         ^^^^^^^^^^^
+    |
+    = note: `FieldChange` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `run_id`, `allowed_domains`, and `variables` are never read
+   --> src/utir.rs:157:9
+    |
+156 | pub struct ExecutionContext {
+    |            ---------------- fields in this struct
+157 |     pub run_id: Uuid,
+    |         ^^^^^^
+158 |     pub sandbox_root: String,
+159 |     pub allowed_domains: Vec<String>,
+    |         ^^^^^^^^^^^^^^^
+160 |     pub variables: HashMap<String, String>,
+    |         ^^^^^^^^^
+    |
+    = note: `ExecutionContext` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `parse_utir_json` is never used
+   --> src/utir.rs:305:8
+    |
+305 | pub fn parse_utir_json(content: &str) -> anyhow::Result<UtirDocument> {
+    |        ^^^^^^^^^^^^^^^
+
+warning: `one-engine` (bin "one-engine") generated 7 warnings (run `cargo fix --bin "one-engine"` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 15.17s
+     Running `target/debug/one-engine --port 7777 --host 0.0.0.0 --memory-path ./memory --allowed-domains httpbin.org,api.github.com,jsonplaceholder.typicode.com`
+[2m2025-09-26T11:48:46.672767Z[0m [32m INFO[0m [2mone_engine[0m[2m:[0m 🧠 One Engine running on http://127.0.0.1:7777
+[2m2025-09-26T11:48:47.490751Z[0m [32m INFO[0m [2mone_engine::api[0m[2m:[0m Compiling and running UTIR: proof-hello (run_id: f61edd64-4783-4753-a63f-1e4696438ad3)
+[2m2025-09-26T11:48:47.909414Z[0m [32m INFO[0m [2mone_engine::memory[0m[2m:[0m Crystallized new pattern: crystallized_shell_assert_shell_shell_http_get_mixed_results (score: 0.960)
+[2m2025-09-26T11:49:50.013845Z[0m [32m INFO[0m [2mone_engine::api[0m[2m:[0m Compiling and running UTIR: proof-hello (run_id: c11d2c71-69a1-4100-b2b3-2f6807dbade3)

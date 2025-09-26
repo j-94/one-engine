@@ -1,0 +1,152 @@
+{
+  "crystallized_patterns": {
+    "crystallized_shell_assert_shell_shell_http_get_mixed_results": {
+      "pattern_id": "dc1ce13b-25e6-414d-b1ac-ae608ddbd976",
+      "name": "crystallized_shell_assert_shell_shell_http_get_mixed_results",
+      "description": "Auto-crystallized from successful execution: Proof: write a file, summarize, open PR",
+      "utir_template": "3e64f9ef7274e21b",
+      "success_metrics": {
+        "avg_success_rate": 0.75,
+        "avg_execution_time_ms": 396,
+        "error_patterns": [
+          "error_at_step_0"
+        ],
+        "trust_distribution": [
+          1.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        "bits_patterns": {
+          "alignment_triggers": [],
+          "uncertainty_patterns": [],
+          "permission_gates": [
+            "permission_step_0",
+            "permission_step_1",
+            "permission_step_2",
+            "permission_step_3"
+          ],
+          "error_signatures": [
+            "error_step_3"
+          ],
+          "context_invalidators": [],
+          "interrupt_handlers": [],
+          "recovery_strategies": [],
+          "trust_builders": [
+            "trust_step_0",
+            "trust_step_1",
+            "trust_step_2"
+          ]
+        }
+      },
+      "innate_constraints": [
+        "requires_permission_gate"
+      ],
+      "verification_rules": [],
+      "crystallization_date": 1758887327,
+      "usage_count": 1,
+      "evolution_history": [
+        {
+          "timestamp": 1758887327,
+          "change_type": "initial_crystallization",
+          "description": "Pattern crystallized from successful ghost",
+          "success_delta": 0.75
+        }
+      ]
+    }
+  },
+  "active_ghosts": {
+    "a7f5caa2-dc83-47b8-a9a4-27b43318704c": {
+      "run_id": "a7f5caa2-dc83-47b8-a9a4-27b43318704c",
+      "task_id": "proof-hello",
+      "goal_description": "Proof: write a file, summarize, open PR",
+      "utir_pattern": "3e64f9ef7274e21b",
+      "success_rate": 0.75,
+      "execution_time_ms": 396,
+      "bits_history": [
+        {
+          "A": 1,
+          "U": 0,
+          "P": 1,
+          "E": 0,
+          "Δ": 0,
+          "I": 0,
+          "R": 0,
+          "T": 1
+        },
+        {
+          "A": 1,
+          "U": 0,
+          "P": 1,
+          "E": 0,
+          "Δ": 0,
+          "I": 0,
+          "R": 0,
+          "T": 1
+        },
+        {
+          "A": 1,
+          "U": 0,
+          "P": 1,
+          "E": 0,
+          "Δ": 0,
+          "I": 0,
+          "R": 0,
+          "T": 1
+        },
+        {
+          "A": 1,
+          "U": 0,
+          "P": 1,
+          "E": 1,
+          "Δ": 0,
+          "I": 0,
+          "R": 0,
+          "T": 0
+        }
+      ],
+      "pattern_signature": "shell_assert_shell_shell_http_get_mixed_results",
+      "timestamp": 1758887327,
+      "crystallization_score": 0.9596187232381775
+    }
+  },
+  "pattern_relationships": {},
+  "evolution_log": [],
+  "innate_reflexes": {
+    "alignment_triggers": [
+      "goal_mismatch_detected",
+      "output_quality_low"
+    ],
+    "uncertainty_patterns": [
+      "ambiguous_command",
+      "novel_pattern_encountered",
+      "verification_inconclusive"
+    ],
+    "permission_gates": [
+      "destructive_file_operation",
+      "network_request_external",
+      "system_level_command"
+    ],
+    "error_signatures": [
+      "command_not_found",
+      "permission_denied",
+      "timeout_exceeded"
+    ],
+    "context_invalidators": [
+      "file_system_changed",
+      "external_dependency_updated"
+    ],
+    "interrupt_handlers": [
+      "user_abort_signal",
+      "resource_exhaustion"
+    ],
+    "recovery_strategies": [
+      "retry_with_backoff",
+      "fallback_to_safe_mode"
+    ],
+    "trust_builders": [
+      "verification_passed",
+      "expected_outcome_achieved"
+    ]
+  }
+}

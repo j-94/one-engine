@@ -258,6 +258,44 @@ impl Bits {
     }
 }
 
+impl Operation {
+    /// Return a concise label for the operation kind
+    pub fn kind(&self) -> &'static str {
+        match self {
+            Operation::Shell { .. } => "shell",
+            Operation::FsRead { .. } => "fs.read",
+            Operation::FsWrite { .. } => "fs.write",
+            Operation::HttpGet { .. } => "http.get",
+            Operation::GitPatch { .. } => "git.patch",
+            Operation::AssertFileExists { .. } => "assert.file_exists",
+            Operation::AssertShellSuccess { .. } => "assert.shell_success",
+            Operation::Sequence { .. } => "sequence",
+            Operation::Parallel { .. } => "parallel",
+            Operation::Conditional { .. } => "conditional",
+            Operation::Retry { .. } => "retry",
+        }
+    }
+
+    /// Provide a human-readable descriptor for logging/receipts
+    pub fn descriptor(&self) -> String {
+        match self {
+            Operation::Shell { command, .. } => command.clone(),
+            Operation::FsRead { path, .. } => format!("read: {}", path),
+            Operation::FsWrite { path, .. } => format!("write: {}", path),
+            Operation::HttpGet { url, .. } => format!("GET {}", url),
+            Operation::GitPatch { repo_path, .. } => format!("git patch -> {}", repo_path),
+            Operation::AssertFileExists { path } => format!("assert exists: {}", path),
+            Operation::AssertShellSuccess { command, .. } => {
+                format!("assert shell success: {}", command)
+            }
+            Operation::Sequence { steps } => format!("sequence ({} steps)", steps.len()),
+            Operation::Parallel { steps, .. } => format!("parallel ({} steps)", steps.len()),
+            Operation::Conditional { .. } => "conditional".to_string(),
+            Operation::Retry { .. } => "retry".to_string(),
+        }
+    }
+}
+
 /// Parse UTIR document from YAML
 pub fn parse_utir(content: &str) -> anyhow::Result<UtirDocument> {
     serde_yaml::from_str(content).map_err(Into::into)
