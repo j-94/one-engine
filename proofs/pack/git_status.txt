@@ -1,0 +1,10 @@
+ M src/api.rs
+ M src/utir.rs
+?? docs/
+?? logs/
+?? memory/
+?? proofs/
+?? scripts/make_proof_pack.sh
+?? scripts/run_utir.sh
+?? scripts/utir_to_dot.sh
+?? tasks/
