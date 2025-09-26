@@ -1,0 +1,10 @@
+run_id	6959c4b8-3465-4d92-8ae5-65e6dcde40d1
+status	failed
+status_line	Error detected, Low trust
+execution_time_ms	32
+operations	
+idx	op	success	tokens	cost_usd	duration_ms	note
+0	shell	true	1	0.000002	8	
+1	assert.shell_success	true	3	0.000006	5	Shell command succeeded
+2	summarize.run	true	11	0.000022	0	Summary: Created proof artefact and ensured it exists in the workspace.
+3	http.get	false	5	0.000010	0	URL not in allowed domains

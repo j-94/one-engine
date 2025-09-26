@@ -1,0 +1,8 @@
+sha256  proofs/pack/*:
+75727f90ad1ff534d86beb8222a6e61e4fffaa5d111519b7a3d0395040c50994  proofs/pack/HELLO_ENGINE.txt
+118d49ad1b69377e14022654e5523af18d62ae4a9749c748b9e5d02b4717b425  proofs/pack/SHA256SUMS.txt
+4a0d9615ed929d895165c2a3ea05ea9000654121d3db8a5e096842c30c879b66  proofs/pack/commit.txt
+080e83a6619ca88a9d8663d704dece19be696e94588e03221341b47ea44c3403  proofs/pack/git_status.txt
+5c0b00db55912b686570fbadc9606cb4fb39af8b5f718ca6c90133969202349f  proofs/pack/plan.svg
+432a41a7deb8869bc2e0d7eff8b2ce21351c993578667eb6f5973c350edf215d  proofs/pack/proof.receipt.json
+cff00b0aa0da23a84fe99331d1963ffa33af3a2f3589a618637eec78c9b27300  proofs/pack/run_summary.tsv

@@ -1,0 +1,5 @@
+ M logs/dev_server.log
+ M scripts/run_utir.sh
+?? docs/
+?? logs/proof.receipt.json
+?? proofs/

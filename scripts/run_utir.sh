@@ -27,14 +27,7 @@ else
   exit 1
 fi
 
-SANITIZED_PAYLOAD=$(printf '%s' "$UTIR_PAYLOAD" | \
-  WORKSPACE_ABS="$WORKSPACE_ABS" python3 - <<'PY'
-import os, sys
-workspace = os.environ.get('WORKSPACE_ABS')
-content = sys.stdin.read()
-print(content.replace('{{WORKSPACE}}', workspace), end='')
-PY
-)
+SANITIZED_PAYLOAD=${UTIR_PAYLOAD//\{\{WORKSPACE\}\}/$WORKSPACE_ABS}
 
 JSON_BODY=$(printf '%s' "$SANITIZED_PAYLOAD" | jq -Rs '{utir: .}')
 

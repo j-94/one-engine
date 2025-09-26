@@ -1,0 +1,11 @@
+digraph UTIR {
+  rankdir=LR;
+  node [shape=box, fontname="Helvetica"];
+  n0 [label="0: shell\nmkdir -p {{WORKSPACE}}/proofs && echo $(date -u) > {{WORKSPACE}}/proofs/HELLO_EN..."];
+  n0 -> n1;
+  n1 [label="1: assert.shell_success\ntest -s {{WORKSPACE}}/proofs/HELLO_ENGINE.txt"];
+  n1 -> n2;
+  n2 [label="2: summarize.run\nCreated proof artefact and ensured it exists in the workspace."];
+  n2 -> n3;
+  n3 [label="3: http.get\nhttps://example-disallowed-host.invalid/"];
+}
