@@ -22,7 +22,11 @@ clap = { version = "4.0", features = ["derive"] }
 regex = "1.0"
 sha2 = "0.10"
 tempfile = "3.0"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 url = "2.0"
 semver = "1.0"
 futures-util = { version = "0.3", features = ["sink"] }
+
+[[bin]]
+name = "utir_to_dot"
+path = "src/bin/utir_to_dot.rs"

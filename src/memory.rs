@@ -419,6 +419,7 @@ impl MemorySystem {
                 crate::utir::Operation::GitPatch { .. } => "git_patch",
                 crate::utir::Operation::AssertFileExists { .. } => "assert_file",
                 crate::utir::Operation::AssertShellSuccess { .. } => "assert_shell",
+                crate::utir::Operation::SummarizeRun { .. } => "summarize_run",
                 crate::utir::Operation::Sequence { .. } => "sequence",
                 crate::utir::Operation::Parallel { .. } => "parallel",
                 crate::utir::Operation::Conditional { .. } => "conditional",

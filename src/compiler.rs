@@ -184,6 +184,8 @@ impl UtirCompiler {
                 .await?
             }
 
+            Operation::SummarizeRun { notes } => (true, format!("Summary: {}", notes)),
+
             Operation::Sequence { steps } => self.execute_sequence(steps, context).await?,
 
             Operation::Parallel {
@@ -213,6 +215,22 @@ impl UtirCompiler {
             }
         };
 
+        // Prepare metadata for receipts
+        let mut metadata = HashMap::new();
+        metadata.insert(
+            "operation_type".to_string(),
+            operation.type_name().to_string(),
+        );
+        let token_estimate = Self::estimate_tokens(&output);
+        metadata.insert("tokens".to_string(), token_estimate.to_string());
+        metadata.insert(
+            "cost_usd".to_string(),
+            format!("{:.6}", token_estimate as f64 * 0.000002f64),
+        );
+        if let Operation::SummarizeRun { notes } = operation {
+            metadata.insert("summary_notes".to_string(), notes.clone());
+        }
+
         // Update bits based on result
         if !success {
             bits.error = 1; // Error occurred
@@ -224,7 +242,7 @@ impl UtirCompiler {
             output,
             bits,
             duration_ms: start.elapsed().as_millis() as u64,
-            metadata: HashMap::new(),
+            metadata,
         })
     }
 
@@ -606,6 +624,11 @@ impl UtirCompiler {
             .allowed_commands
             .iter()
             .any(|cmd| first_word == cmd))
+    }
+
+    fn estimate_tokens(output: &str) -> u32 {
+        let tokens = output.split_whitespace().count() as u32;
+        tokens.max(1)
     }
 
     fn is_url_allowed(&self, url: &str) -> Result<bool> {
