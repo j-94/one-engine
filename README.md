@@ -60,6 +60,17 @@ sudo ./deploy.sh
   ./scripts/open_canvas.sh
   ```
   This spins up tmux sessions (`one_engine`, `one_engine_canvas_server`) if needed. Attach to them for live logs.
+- Publish the canvas to GitHub Pages for remote viewing:
+  1. Ensure the repository's **Settings → Pages** source is set to **GitHub Actions**.
+  2. Push to `main` (or trigger the workflow manually) and let `Deploy Conversation Canvas` build the static bundle.
+  3. Visit `https://<your-username>.github.io/<repo-name>/` to browse the live-updating canvas. The page auto-refreshes every five seconds when visible and shows status feedback if `conversation.md` is missing.
+
+  Use `./scripts/build_canvas_site.sh` locally to preview the generated `public/` bundle before deployment:
+  ```bash
+  ./scripts/build_canvas_site.sh ./public
+  python -m http.server --directory ./public 8080
+  ```
+  Then open `http://127.0.0.1:8080/` to confirm the hosted content.
 
 ### Governance Automation
 Run the turnkey governance check (engine must be running locally):
