@@ -1,0 +1,7 @@
+[
+  {
+    "branch": null,
+    "status": "skipped",
+    "note": "No remote branches were found. Configure remotes, rerun scripts/generate_merge_report.sh, then use scripts/create_production_branch.sh to assemble production."
+  }
+]
