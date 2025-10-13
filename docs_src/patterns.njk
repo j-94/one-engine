@@ -14,7 +14,7 @@ permalink: "/docs/patterns/{{ item.id }}.html"
 </div>
 <hr />
 {% if item.docs_path %}
-  {{ rawfile(item.docs_path) | safe }}
+  {% rawfile item.docs_path %}
 {% else %}
   <p>No doc page found.</p>
 {% endif %}

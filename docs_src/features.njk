@@ -11,7 +11,7 @@ permalink: "/docs/features/{{ item.id }}.html"
 <p class="muted">{{ item.summary }}</p>
 <hr />
 {% if item.docs_path %}
-  {{ rawfile(item.docs_path) | safe }}
+  {% rawfile item.docs_path %}
 {% else %}
   <p>No doc page found. Summary shown above.</p>
 {% endif %}
