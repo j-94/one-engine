@@ -3,12 +3,13 @@ module.exports = function(eleventyConfig) {
   const path = require('path');
 
   // Shortcode to inline raw file contents (e.g., your existing HTML pages)
-  eleventyConfig.addShortcode('rawfile', function(filePath) {
+  // Nunjucks shortcode to inline raw file contents
+  eleventyConfig.addNunjucksShortcode('rawfile', function(filePath) {
     try {
       const abs = path.resolve(process.cwd(), filePath);
       return fs.readFileSync(abs, 'utf8');
     } catch (e) {
-      return `<p style="color:#f66">Missing file: ${filePath}</p>`;
+      return `<p style=\"color:#f66\">Missing file: ${filePath}</p>`;
     }
   });
 
