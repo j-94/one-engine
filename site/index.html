@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One Engine – Observable Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; line-height: 1.5; }
+    code, pre { background: #f6f8fa; padding: 0.25rem 0.5rem; border-radius: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+    .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; background: #fff; }
+  </style>
+</head>
+<body>
+  <h1>One Engine – Observable Demo</h1>
+  <p>This page links to artifacts captured during the demo: health/version, conversational effects, UTIR safety checks, events, and git history.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Service</h2>
+      <ul>
+        <li><a href="../out_one_engine/healthz.json">healthz.json</a></li>
+        <li><a href="../out_one_engine/version.json">version.json</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Conversation</h2>
+      <ul>
+        <li><a href="../out_one_engine/01_define_echo_ephemeral.json">01_define_echo_ephemeral.json</a></li>
+        <li><a href="../out_one_engine/02_call_echo_ephemeral.json">02_call_echo_ephemeral.json</a></li>
+        <li><a href="../out_one_engine/04_approve_echo.json">04_approve_echo.json</a></li>
+        <li><a href="../out_one_engine/05_call_echo_persisted.json">05_call_echo_persisted.json</a></li>
+        <li><a href="../out_one_engine/06_call_echo_after_utir.json">06_call_echo_after_utir.json</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Safety (UTIR)</h2>
+      <ul>
+        <li><a href="../out_one_engine/utir_blocked_shell.json">utir_blocked_shell.json</a></li>
+        <li><a href="../out_one_engine/utir_disallowed_domain.json">utir_disallowed_domain.json</a></li>
+        <li><a href="../out_one_engine/utir_allowed_domain.json">utir_allowed_domain.json</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Events & History</h2>
+      <ul>
+        <li><a href="../out_one_engine/events_tail.json">events_tail.json</a></li>
+        <li><a href="../out_one_engine/next_nudges_events_tail.json">next_nudges_events_tail.json</a></li>
+        <li><a href="../out_one_engine/git_log.txt">git_log.txt</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Docs</h2>
+      <ul>
+        <li><a href="../docs/observability.md">docs/observability.md</a></li>
+        <li><a href="../docs/RESEARCH_DRAFT.md">docs/RESEARCH_DRAFT.md</a></li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
