@@ -9,7 +9,7 @@ title: Home
 <div class="grid">
 {% for p in catalog.patterns | selectattr('pinned') %}
   <div class="card">
-    <h3><a href="/docs/patterns/{{ p.id }}.html">{{ p.title }}</a></h3>
+    <h3><a href="/patterns/{{ p.id }}.html">{{ p.title }}</a></h3>
     <p class="muted">{{ p.summary }}</p>
     <div>
       {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
@@ -22,10 +22,10 @@ title: Home
 <div class="grid">
 {% for f in catalog.features %}
   <div class="card">
-    <h3><a href="/docs/features/{{ f.id }}.html">{{ f.title }}</a></h3>
+    <h3><a href="/features/{{ f.id }}.html">{{ f.title }}</a></h3>
     <p class="muted">{{ f.summary }}</p>
   </div>
 {% endfor %}
 </div>
 
-<h2><a href="/docs/achievements/index.html">Achievements</a></h2>
+<h2><a href="/achievements/index.html">Achievements</a></h2>
