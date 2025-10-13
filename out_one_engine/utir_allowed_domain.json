@@ -1,0 +1,1 @@
+{"run_id":"efb36ba0-50d2-41db-9252-3676dddd2b1c","status":"completed","bits":{"A":1,"U":0,"P":0,"E":0,"Δ":0,"I":0,"R":0,"T":1},"status_line":"Ready","data":{"task_id":"allowed-domain","success":true,"operations_count":1,"total_duration_ms":13,"pattern_signature":"direct_utir","crystallized":false},"error":null,"execution_time_ms":19}

@@ -1,0 +1,1 @@
+{"run_id":"c9181eaf-8c1e-405b-acaf-2ec0bd2eb151","status":"failed","bits":{"A":1,"U":0,"P":0,"E":1,"Δ":0,"I":0,"R":0,"T":0},"status_line":"Error detected, Low trust","data":{"task_id":"blocked-shell","success":false,"operations_count":1,"total_duration_ms":0,"pattern_signature":"direct_utir","crystallized":false},"error":null,"execution_time_ms":9}

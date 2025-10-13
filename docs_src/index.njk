@@ -1,0 +1,31 @@
+---
+layout: layout.njk
+title: Home
+---
+
+<h1>Documentation</h1>
+
+<h2>Pinned Patterns</h2>
+<div class="grid">
+{% for p in catalog.patterns | selectattr('pinned') %}
+  <div class="card">
+    <h3><a href="/docs/patterns/{{ p.id }}.html">{{ p.title }}</a></h3>
+    <p class="muted">{{ p.summary }}</p>
+    <div>
+      {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+<h2>Features</h2>
+<div class="grid">
+{% for f in catalog.features %}
+  <div class="card">
+    <h3><a href="/docs/features/{{ f.id }}.html">{{ f.title }}</a></h3>
+    <p class="muted">{{ f.summary }}</p>
+  </div>
+{% endfor %}
+</div>
+
+<h2><a href="/docs/achievements/index.html">Achievements</a></h2>

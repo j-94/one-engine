@@ -1,0 +1,15 @@
+---
+layout: layout.njk
+permalink: "/docs/achievements/index.html"
+---
+
+<h1>Achievements</h1>
+<div class="grid">
+{% for a in catalog.achievements %}
+  <div class="card">
+    <h3>{{ a.title }}</h3>
+    <p class="muted">{{ a.description }}</p>
+    {% if a.date %}<p class="muted">Date: {{ a.date }}</p>{% endif %}
+  </div>
+{% endfor %}
+</div>

@@ -1,0 +1,12 @@
+{
+  "name": "one-engine-docs",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev-docs": "npx @11ty/eleventy --serve --input=docs_src --output=docs",
+    "build-docs": "npx @11ty/eleventy --input=docs_src --output=docs"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

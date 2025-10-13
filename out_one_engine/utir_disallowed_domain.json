@@ -1,0 +1,1 @@
+{"run_id":"1df56f22-db95-4a67-8664-52f2ec3de2ce","status":"failed","bits":{"A":1,"U":0,"P":0,"E":1,"Δ":0,"I":0,"R":0,"T":0},"status_line":"Error detected, Low trust","data":{"task_id":"disallowed-domain","success":false,"operations_count":1,"total_duration_ms":1,"pattern_signature":"direct_utir","crystallized":false},"error":null,"execution_time_ms":7}

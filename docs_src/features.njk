@@ -1,0 +1,17 @@
+---
+layout: layout.njk
+pagination:
+  data: catalog.features
+  size: 1
+  alias: item
+permalink: "/docs/features/{{ item.id }}.html"
+---
+
+<h1>{{ item.title }}</h1>
+<p class="muted">{{ item.summary }}</p>
+<hr />
+{% if item.docs_path %}
+  {{ rawfile(item.docs_path) | safe }}
+{% else %}
+  <p>No doc page found. Summary shown above.</p>
+{% endif %}

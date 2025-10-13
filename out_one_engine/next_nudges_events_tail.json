@@ -1,0 +1,206 @@
+{
+  "branch_id": "fa978544-b662-40d7-9d38-1a7c5a72dd69",
+  "label": "learning-loop",
+  "tail": [
+    {
+      "Prompt": {
+        "content": "Define a simple API named 'echo' that accepts a single parameter 'text' and returns it unmodified."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"echo\", description: \"Define a simple API named 'echo' that accepts a single parameter 'text' and returns it unmodified.\", parameters: [ApiParameterSpec { name: \"text\", param_type: None, description: Some(\"parameter inferred from instruction\") }], return_description: Some(\"it unmodified.\"), persistence: Ephemeral, behavioral_hint: Echo })"
+      }
+    },
+    {
+      "ApiGenerated": {
+        "name": "echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'echo' with text='Hello, Loop'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"echo\", arguments: {\"text\": \"Hello, Loop\"} })"
+      }
+    },
+    {
+      "ApiCalled": {
+        "name": "echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Define a persistent API named 'echo' that accepts 'text' and returns it unmodified."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"echo\", description: \"Define a persistent API named 'echo' that accepts 'text' and returns it unmodified.\", parameters: [], return_description: Some(\"it unmodified.\"), persistence: Persist, behavioral_hint: Echo })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Approve pattern 'echo'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "ApprovePattern { name: \"echo\" }"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "approval: echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'echo' with text='Hello Again'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"echo\", arguments: {\"text\": \"Hello Again\"} })"
+      }
+    },
+    {
+      "ApiCalled": {
+        "name": "echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'echo' with text='After UTIR, still works'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"echo\", arguments: {\"text\": \"After UTIR, still works\"} })"
+      }
+    },
+    {
+      "ApiCalled": {
+        "name": "echo"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Define a persistent API named 'slugify' that accepts 'text' and returns a URL-safe slug."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"slugify\", description: \"Define a persistent API named 'slugify' that accepts 'text' and returns a URL-safe slug.\", parameters: [], return_description: Some(\"a url-safe slug.\"), persistence: Persist, behavioral_hint: Custom(\"Define a persistent API named 'slugify' that accepts 'text' and returns a URL-safe slug.\") })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Approve pattern 'slugify'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "ApprovePattern { name: \"slugify\" }"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "approval: slugify"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'slugify' with text='One Engine: Observability!'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"slugify\", arguments: {\"text\": \"One Engine: Observability!\"} })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Define a persistent API named 'reverse' that accepts 'text' and returns the reversed string."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"reverse\", description: \"Define a persistent API named 'reverse' that accepts 'text' and returns the reversed string.\", parameters: [], return_description: Some(\"the reversed string.\"), persistence: Persist, behavioral_hint: Custom(\"Define a persistent API named 'reverse' that accepts 'text' and returns the reversed string.\") })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Approve pattern 'reverse'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "ApprovePattern { name: \"reverse\" }"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "approval: reverse"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'reverse' with text='civic'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"reverse\", arguments: {\"text\": \"civic\"} })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Define a persistent API named 'counter' that increments an internal counter and returns it each call."
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CreateApi(CreateApiSpec { name: \"counter\", description: \"Define a persistent API named 'counter' that increments an internal counter and returns it each call.\", parameters: [], return_description: Some(\"it each call.\"), persistence: Persist, behavioral_hint: Custom(\"Define a persistent API named 'counter' that increments an internal counter and returns it each call.\") })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Approve pattern 'counter'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "ApprovePattern { name: \"counter\" }"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "approval: counter"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'counter'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"counter\", arguments: {} })"
+      }
+    },
+    {
+      "Prompt": {
+        "content": "Call the API 'counter'"
+      }
+    },
+    {
+      "ParsedIntent": {
+        "description": "CallApi(CallApiSpec { name: \"counter\", arguments: {} })"
+      }
+    }
+  ]
+}
