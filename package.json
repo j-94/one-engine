@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "scripts": {
     "dev-docs": "npx @11ty/eleventy --serve --input=docs_src --output=docs",
-    "build-docs": "npx @11ty/eleventy --input=docs_src --output=docs"
+    "build-docs": "npx @11ty/eleventy --input=docs_src --output=docs",
+    "ide": "PORT=${PORT:-0} NEXT_PUBLIC_ENGINE_BASE_URL=${NEXT_PUBLIC_ENGINE_BASE_URL:-http://127.0.0.1:8000} npm run dev --prefix apps/ide -- -p $PORT",
+    "build-ide": "npm run build --prefix apps/ide"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0"
