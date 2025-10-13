@@ -1,1 +1,11 @@
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+*/.DS_Store
+
+# Eleventy temporary nested folder (prevent accidental re-add)
+docs/docs/
+
 /target
