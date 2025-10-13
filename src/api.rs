@@ -1,4 +1,4 @@
-use crate::branch::{BranchManager, BranchState};
+use crate::branch::{AutoDoc, BranchManager, BranchState};
 use crate::compiler::UtirCompiler;
 use crate::conversation::{ConversationEffect, ConversationService};
 use crate::memory::MemorySystem;
@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -132,9 +133,13 @@ pub fn create_router(state: Arc<EngineState>) -> Router {
             "/conversation/:branch_id/events",
             get(get_conversation_events),
         )
+        .route("/autodoc/:branch_id", get(get_autodoc_for_branch))
+        .route("/autodoc/:branch_id/names", get(get_autodoc_names_for_branch))
+        .route("/autodoc/:branch_id/:spec", get(get_autodoc_for_branch_spec))
         .route("/execute_goal", post(execute_goal))
         .route("/compile_and_run", post(compile_and_run))
         .route("/conversation/genesis", post(run_genesis_conversation))
+        .nest_service("/ui", ServeDir::new("site"))
         .layer(CorsLayer::permissive())
         .with_state(state)
 }
@@ -577,4 +582,56 @@ async fn get_conversation_events(
         .await
         .map(Json)
         .ok_or(StatusCode::NOT_FOUND)
+}
+
+/// Generate autodocumentation for a branch
+async fn get_autodoc_for_branch(
+    State(state): State<Arc<EngineState>>,
+    Path(branch_id): Path<Uuid>,
+) -> Result<Json<AutoDoc>, StatusCode> {
+    state
+        .branches
+        .generate_autodoc(branch_id)
+        .await
+        .map(Json)
+        .ok_or(StatusCode::NOT_FOUND)
+}
+
+/// Generate autodoc for a branch, filtered by colon-separated spec: route:query:engine
+/// For now, we primarily filter by route (API name), ignoring query and engine fields if provided.
+async fn get_autodoc_for_branch_spec(
+    State(state): State<Arc<EngineState>>,
+    Path((branch_id, spec)): Path<(Uuid, String)>,
+) -> Result<Json<AutoDoc>, StatusCode> {
+    if let Some(mut doc) = state.branches.generate_autodoc(branch_id).await {
+        let parts: Vec<&str> = spec.split(':').collect();
+        if let Some(route) = parts.get(0) {
+            if !route.is_empty() {
+                doc.endpoints.retain(|e| e.name == *route);
+            }
+        }
+        // parts.get(1) => query (ignored for now)
+        // parts.get(2) => engine (ignored for now)
+        return Ok(Json(doc));
+    }
+    Err(StatusCode::NOT_FOUND)
+}
+
+/// Return a simple list of persisted endpoint names for a branch.
+/// If the branch does not exist, return an empty list (memory may be ephemeral across restarts).
+async fn get_autodoc_names_for_branch(
+    State(state): State<Arc<EngineState>>,
+    Path(branch_id): Path<Uuid>,
+) -> Json<Vec<String>> {
+    if let Some(doc) = state.branches.generate_autodoc(branch_id).await {
+        let names = doc
+            .endpoints
+            .into_iter()
+            .filter(|e| e.persisted)
+            .map(|e| e.name)
+            .collect::<Vec<_>>();
+        Json(names)
+    } else {
+        Json(vec![])
+    }
 }

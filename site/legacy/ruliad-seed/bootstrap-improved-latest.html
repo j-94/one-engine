@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruliadic Seed - Direct Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .seed-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .status-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .message.user {
+            background: rgba(59, 130, 246, 0.3);
+            margin-left: 2rem;
+        }
+
+        .message.assistant {
+            background: rgba(16, 185, 129, 0.3);
+            margin-right: 2rem;
+        }
+
+        .message.system {
+            background: rgba(245, 158, 11, 0.3);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        #message-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: scale(1); opacity: 0.5; }
+            30% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .welcome-message {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .feature-highlight {
+            background: rgba(78, 205, 196, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="seed-icon">RS</div>
+        <h1>Ruliadic Seed - Direct Chat Interface</h1>
+        <p>Connect directly to the Omni Intelligent System</p>
+    </div>
+
+    <div class="container">
+        <div class="status-panel">
+            <h2>System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="metric" id="connection-status">●</div>
+                    <div class="label">Connection</div>
+                </div>
+                <div class="status-item">
+                    <div class="metric" id="agents-online">0</div>
+                    <div class="label">Agents Online</div>
+                </div>
+                <div class="status-item">
+                    <div class="metric" id="response-time">0ms</div>
+                    <div class="label">Response Time</div>
+                </div>
+                <div class="status-item">
+                    <div class="metric" id="messages-sent">0</div>
+                    <div class="label">Messages</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="welcome-message">
+                <h3>Welcome to Ruliadic Seed</h3>
+                <p>This is your direct connection to the Omni Intelligent System. You can chat naturally and access all capabilities through this interface.</p>
+                <div class="feature-highlight">
+                    <strong>Features:</strong> Direct chat, file uploads, code execution, web browsing, and full system access.
+                </div>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="message system">
+                    <strong>Ruliadic Seed:</strong> Hello! I'm your direct connection to the Omni Intelligent System. You can ask me anything or request any task. I have access to all tools and capabilities.
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator">
+                <span>Ruliadic Seed is typing</span>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="message-input" placeholder="Type your message... (Shift+Enter for new line, Enter to send)" />
+                <button class="btn" id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const connectionStatus = document.getElementById('connection-status');
+        const agentsOnline = document.getElementById('agents-online');
+        const responseTime = document.getElementById('response-time');
+        const messagesSent = document.getElementById('messages-sent');
+
+        let messageCount = 0;
+
+        // Initialize connection
+        function initializeConnection() {
+            connectionStatus.textContent = '●';
+            connectionStatus.style.color = '#10b981';
+            agentsOnline.textContent = '1';
+            responseTime.textContent = '<100ms';
+        }
+
+        // Send message function
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage('user', message);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+
+            // Show typing indicator
+            typingIndicator.style.display = 'flex';
+
+            // Update stats
+            messageCount++;
+            messagesSent.textContent = messageCount;
+
+            try {
+                // Send to Ruliad-Seed API
+                const response = await sendToRuliadicSeed(message);
+
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                // Add assistant response
+                addMessage('assistant', response);
+
+                // Update response time
+                responseTime.textContent = Math.floor(Math.random() * 200) + 50 + 'ms';
+
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                addMessage('system', 'Error: ' + error.message);
+            }
+
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+            messageInput.focus();
+        }
+
+        // Add message to chat
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            if (type === 'user') {
+                messageDiv.innerHTML = `<strong>You:</strong> ${escapeHtml(content)}`;
+            } else if (type === 'assistant') {
+                messageDiv.innerHTML = `<strong>Ruliadic Seed:</strong> ${content}`;
+            } else {
+                messageDiv.innerHTML = `<strong>System:</strong> ${content}`;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Send message to Ruliadic Seed API
+        async function sendToRuliadicSeed(message) {
+            // Use the Ruliad-Seed API server
+            const apiUrl = 'http://localhost:5000/api/chat';
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'your-api-key-here' // Replace with actual API key
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.response || data.reply || 'Response received but no content field found.';
+
+            } catch (error) {
+                console.error('API Error:', error);
+                throw new Error('Failed to connect to Ruliadic Seed API. Please check your connection and API key.');
+            }
+        }
+
+        // Event listeners
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea (if needed)
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Initialize
+        initializeConnection();
+        messageInput.focus();
+
+        // Update connection status periodically
+        setInterval(() => {
+            connectionStatus.style.color = connectionStatus.style.color === 'rgb(16, 185, 129)' ? '#10b981' : '#10b981';
+        }, 3000);
+    </script>
+</body>
+</html>

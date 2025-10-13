@@ -1,0 +1,533 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Meta² Agent Observatory</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #10131a;
+      color: #f5f7ff;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .meta-info {
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+    .project {
+      background: #181d29;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+    .project header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .project h2 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+    .meta span {
+      margin-right: 1rem;
+      font-size: 0.9rem;
+      color: #aab2d5;
+    }
+    .description {
+      margin-top: 0.5rem;
+      color: #c9d1f3;
+    }
+    .path code {
+      font-size: 0.85rem;
+      color: #8ea4ff;
+    }
+    h3 {
+      margin-bottom: 0.4rem;
+      margin-top: 1.2rem;
+      font-size: 1rem;
+      color: #ced6ff;
+    }
+    ul {
+      list-style: disc;
+      padding-left: 1.2rem;
+      margin-top: 0.4rem;
+    }
+    li {
+      margin-bottom: 0.3rem;
+    }
+    code {
+      background: rgba(255,255,255,0.08);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .status-pass { color: #4ade80; }
+    .status-fail { color: #f87171; }
+    .status-dirty { color: #fbbf24; }
+    .status-clean { color: #4ade80; }
+    .note { color: #94a3b8; font-size: 0.85rem; margin-left: 0.4rem; }
+    .features code { color: #60a5fa; }
+    .dryrun, .governance {
+      margin-top: 3rem;
+      background: #181d29;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+    .dryrun table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    .dryrun th, .dryrun td {
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 0.5rem;
+      vertical-align: top;
+    }
+    .dryrun th {
+      background: rgba(255,255,255,0.08);
+      text-align: left;
+    }
+    .dryrun details {
+      margin-top: 0.3rem;
+    }
+    .dryrun pre {
+      white-space: pre-wrap;
+      background: rgba(255,255,255,0.06);
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e5e9ff;
+    }
+    .dryrun a { color: #60a5fa; }
+    .governance-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+</head>
+<body>
+  <h1>Meta² Agent Observatory</h1>
+  <div class="meta-info">Generated at 2025-09-24T10:42:16+01:00. Data source: <code>latest.json</code>.</div>
+  <div class="grid">
+    
+    <section class=project>
+      <header>
+        <h2>Meta² AgentOps</h2>
+        <div class=meta>
+          <span class=role>core_runtime</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>One-command runtime launcher plus orchestrator/bridge stack managed via AGENTS.md.</p>
+      <p class=path><code>/Users/imac/Desktop/agentops</code></p>
+      <p class=features>Features CSV: <code>reports/features-latest.csv</code></p>
+      <h3>Documentation</h3>
+      <ul class=docs><li>../AGENTS.md (file)</li><li>run.sh (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f run.sh</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Not a git repository.</li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Bootstrap Sandbox</h2>
+        <div class=meta>
+          <span class=role>consolidated_stack</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Local consolidation of analysis, interface, bridge, SSOT, and toolcard experiments.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-bootstrap</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>docs (dir)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/meta2-bootstrap.git</code></li><li>Branch: <code>main</code></li><li>Latest: <code>2808363</code> — Bootstrap: initial scaffold</li><li>Working tree: <strong class=status-clean>clean</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Interface</h2>
+        <div class=meta>
+          <span class=role>operator_ui</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Next.js operator console tied to docs/flows.yaml with telemetry helpers.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-interface</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>docs/flows.yaml (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f package.json</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/meta2-interface.git</code></li><li>Branch: <code>backup/2025-09-23</code></li><li>Latest: <code>26ac36a</code> — Backup: hydrate flows from docs and capture UI events</li><li>Working tree: <strong class=status-clean>clean</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Gateway</h2>
+        <div class=meta>
+          <span class=role>mcp_registry</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>MCP registry plus automation scripts for collecting and validating tool servers.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-gateway</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>mcps/registry.json (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/meta2-gateway.git</code></li><li>Branch: <code>main</code></li><li>Latest: <code>4025ea6</code> — Add comprehensive SOTA validation summary</li><li>Working tree: <strong class=status-clean>clean</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Onboarding Feature</h2>
+        <div class=meta>
+          <span class=role>personalization</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Prototype that derives preferred tools/workflows from shell history and exposes FastAPI hooks.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-onboarding-feature</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>api-integration.py (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/meta2-onboarding-feature.git</code></li><li>Branch: <code>backup/2025-09-23</code></li><li>Latest: <code>5c2294a</code> — Backup: add onboarding test harness scripts</li><li>Working tree: <strong class=status-dirty>dirty</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Chat Thread</h2>
+        <div class=meta>
+          <span class=role>conversation_trace</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Explorer for orchestrator conversation threads, bits, and toolcards.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-chat-thread</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/meta2-chat-thread.git</code></li><li>Branch: <code>backup/2025-09-23</code></li><li>Latest: <code>70bafe8</code> — Backup: add onboarding automation helpers</li><li>Working tree: <strong class=status-dirty>dirty</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Meta² Idea Validator</h2>
+        <div class=meta>
+          <span class=role>prompt_lab</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Scripts and configs for validating prompts/workflows before production wiring.</p>
+      <p class=path><code>/Users/imac/Desktop/meta2-idea-validator</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>scripts (dir)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Not a git repository.</li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Agent S2 Sandbox</h2>
+        <div class=meta>
+          <span class=role>external_gui_agent</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Simular Agent S2 generalist-specialist GUI framework with Perplexica integration.</p>
+      <p class=path><code>/Users/imac/Desktop/imac/AgentS_test/Agent-S</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>models.md (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/simular-ai/Agent-S.git</code></li><li>Branch: <code>main</code></li><li>Latest: <code>393d243</code> — Merge pull request #53 from simular-ai/setup_improvements</li><li>Working tree: <strong class=status-dirty>dirty</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>WhatsApp MCP Server</h2>
+        <div class=meta>
+          <span class=role>communication_bridge</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>WhatsApp Model Context Protocol bridge (Go + Python).</p>
+      <p class=path><code>/Users/imac/Desktop/whatsapp-mcp</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/lharries/whatsapp-mcp.git</code></li><li>Branch: <code>main</code></li><li>Latest: <code>7d6a06d</code> — Update README.md</li><li>Working tree: <strong class=status-dirty>dirty</strong></li></ul>
+    </section>
+    
+
+    <section class=project>
+      <header>
+        <h2>Donkey DocETL Agents</h2>
+        <div class=meta>
+          <span class=role>docetl_multi_agent</span>
+          <span class=owner>Owner: imac</span>
+        </div>
+      </header>
+      <p class=description>Multi-agent DocETL pipeline (research/improvement/decision/terminal agents).</p>
+      <p class=path><code>/Users/imac/Donkeyv1-extracted/donkey</code></p>
+      
+      <h3>Documentation</h3>
+      <ul class=docs><li>README.md (file)</li><li>agents (dir)</li></ul>
+      <h3>Tests</h3>
+      <ul class=tests><li><code>test -f README.md</code> → <strong class=status-pass>pass</strong> </li></ul>
+      <h3>Git</h3>
+      <ul class=git><li>Remote: <code>https://github.com/j-94/Donkeyv1-extracted.git</code></li><li>Branch: <code>main</code></li><li>Latest: <code>7358dc3e</code> — Initial commit of extracted files</li><li>Working tree: <strong class=status-dirty>dirty</strong></li></ul>
+    </section>
+    
+  </div>
+  
+    <section class=governance>
+      <h2>Governance</h2>
+      <div class=governance-grid>
+        <div>
+          <h3>Pending Toolcards</h3>
+          <ul><li><em>None</em></li></ul>
+        </div>
+        <div>
+          <h3>Latest Heartbeat</h3>
+          <ul><li><em>No heartbeat recorded.</em></li></ul>
+        </div>
+      </div>
+    </section>
+    
+  
+    <section class=dryrun>
+      <h2>Dry-Run Evidence</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Run ID</th>
+            <th>Target</th>
+            <th>Command</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Bits</th>
+            <th>Cost (ms)</th>
+            <th>Artifacts</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td><code>dryrun-3d93e8a0</code></td>
+          <td>one-engine</td>
+          <td><code>cargo check --quiet --manifest-path /Users/imac/Desktop/one-engine/Cargo.toml</code></td>
+          <td>✅ (rc=0 )</td>
+          <td>0.43s</td>
+          <td>A:1 U:0 P:1 E:0 delta:0 I:0 R:0 T:1 M:0</td>
+          <td>430</td>
+          <td><a href="file:///Users/imac/Desktop/agentops/analysis/out/ssot/dryrun-3d93e8a0/dry_run.log">log</a>
+            <details><summary>preview</summary><pre>&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+...
+478 |     fn analyze_bits_patterns(&amp;self, bits_history: &amp;[Bits]) -&gt; BitsPatterns {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+...
+531 |     fn extract_safety_constraints(&amp;self, ghost: &amp;ExecutionGhost) -&gt; Vec&lt;String&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+546 |     fn extract_verification_rules(&amp;self, ghost: &amp;ExecutionGhost) -&gt; Vec&lt;String&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `run_id`, `allowed_domains`, and `variables` are never read
+   --&gt; src/utir.rs:157:9
+    |
+156 | pub struct ExecutionContext {
+    |            ---------------- fields in this struct
+157 |     pub run_id: Uuid,
+    |         ^^^^^^
+158 |     pub sandbox_root: String,
+159 |     pub allowed_domains: Vec&lt;String&gt;,
+    |         ^^^^^^^^^^^^^^^
+160 |     pub variables: HashMap&lt;String, String&gt;,
+    |         ^^^^^^^^^
+    |
+    = note: `ExecutionContext` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `parse_utir_json` is never used
+   --&gt; src/utir.rs:267:8
+    |
+267 | pub fn parse_utir_json(content: &amp;str) -&gt; anyhow::Result&lt;UtirDocument&gt; {
+    |        ^^^^^^^^^^^^^^^</pre></details></td>
+        </tr>
+        
+
+        <tr>
+          <td><code>dryrun-6c4aa8ac</code></td>
+          <td>one-engine</td>
+          <td><code>cargo check --quiet --manifest-path /Users/imac/Desktop/one-engine/Cargo.toml</code></td>
+          <td>✅ (rc=0 )</td>
+          <td>1.29s</td>
+          <td>A:1 U:0 P:1 E:0 delta:0 I:0 R:0 T:1 M:0</td>
+          <td>1286</td>
+          <td><a href="file:///Users/imac/Desktop/agentops/analysis/out/ssot/dryrun-6c4aa8ac/dry_run.log">log</a>
+            <details><summary>preview</summary><pre>&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+...
+478 |     fn analyze_bits_patterns(&amp;self, bits_history: &amp;[Bits]) -&gt; BitsPatterns {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+...
+531 |     fn extract_safety_constraints(&amp;self, ghost: &amp;ExecutionGhost) -&gt; Vec&lt;String&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+546 |     fn extract_verification_rules(&amp;self, ghost: &amp;ExecutionGhost) -&gt; Vec&lt;String&gt; {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `run_id`, `allowed_domains`, and `variables` are never read
+   --&gt; src/utir.rs:157:9
+    |
+156 | pub struct ExecutionContext {
+    |            ---------------- fields in this struct
+157 |     pub run_id: Uuid,
+    |         ^^^^^^
+158 |     pub sandbox_root: String,
+159 |     pub allowed_domains: Vec&lt;String&gt;,
+    |         ^^^^^^^^^^^^^^^
+160 |     pub variables: HashMap&lt;String, String&gt;,
+    |         ^^^^^^^^^
+    |
+    = note: `ExecutionContext` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `parse_utir_json` is never used
+   --&gt; src/utir.rs:267:8
+    |
+267 | pub fn parse_utir_json(content: &amp;str) -&gt; anyhow::Result&lt;UtirDocument&gt; {
+    |        ^^^^^^^^^^^^^^^</pre></details></td>
+        </tr>
+        
+
+        <tr>
+          <td><code>dryrun-84c509da</code></td>
+          <td>one-engine</td>
+          <td><code>cargo check --quiet --manifest-path /Users/imac/Desktop/one-engine/Cargo.toml</code></td>
+          <td>✅ (rc=0 )</td>
+          <td>0.39s</td>
+          <td>A:1 U:0 P:1 E:0 delta:0 I:0 R:0 T:1 M:0</td>
+          <td>385</td>
+          <td><a href="file:///Users/imac/Desktop/agentops/analysis/out/ssot/dryrun-84c509da/dry_run.log">log</a>
+            <details><summary>preview</summary><pre> identifier to snake case: `a`
+    |
+    = note: `#[warn(non_snake_case)]` on by default
+
+warning: structure field `U` should have a snake case name
+   --&gt; src/utir.rs:179:9
+    |
+179 |     pub U: u8,
+    |         ^ help: convert the identifier to snake case (notice the capitalization): `u`
+
+warning: structure field `P` should have a snake case name
+   --&gt; src/utir.rs:181:9
+    |
+181 |     pub P: u8,
+    |         ^ help: convert the identifier to snake case: `p`
+
+warning: structure field `E` should have a snake case name
+   --&gt; src/utir.rs:183:9
+    |
+183 |     pub E: u8,
+    |         ^ help: convert the identifier to snake case: `e`
+
+warning: structure field `I` should have a snake case name
+   --&gt; src/utir.rs:188:9
+    |
+188 |     pub I: u8,
+    |         ^ help: convert the identifier to snake case (notice the capitalization): `i`
+
+warning: structure field `R` should have a snake case name
+   --&gt; src/utir.rs:190:9
+    |
+190 |     pub R: u8,
+    |         ^ help: convert the identifier to snake case: `r`
+
+warning: structure field `T` should have a snake case name
+   --&gt; src/utir.rs:192:9
+    |
+192 |     pub T: u8,
+    |         ^ help: convert the identifier to snake case: `t`</pre></details></td>
+        </tr>
+        
+
+        <tr>
+          <td><code>dryrun-ed8ebcd1</code></td>
+          <td>one-engine</td>
+          <td><code>cargo check --quiet --manifest-path /Users/imac/Desktop/one-engine/Cargo.toml</code></td>
+          <td>❌ (rc=101 )</td>
+          <td>1.77s</td>
+          <td>A:1 U:1 P:1 E:1 delta:0 I:0 R:0 T:0 M:0</td>
+          <td>1765</td>
+          <td><a href="file:///Users/imac/Desktop/agentops/analysis/out/ssot/dryrun-ed8ebcd1/dry_run.log">log</a>
+            <details><summary>preview</summary><pre>Command: cargo check --quiet --manifest-path /Users/imac/Desktop/one-engine/Cargo.toml
+Return code: 101
+Duration: 1.77s
+
+stdout:
+&lt;empty&gt;
+
+stderr:
+error[E0425]: cannot find value `undefined_symbol` in this scope
+   --&gt; src/utir.rs:156:13
+    |
+156 |     let _ = undefined_symbol;
+    |             ^^^^^^^^^^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `one-engine` (bin &quot;one-engine&quot;) due to 1 previous error</pre></details></td>
+        </tr>
+        
+        </tbody>
+      </table>
+    </section>
+    
+</body>
+</html>

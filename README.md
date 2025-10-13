@@ -49,7 +49,7 @@ sudo ./deploy.sh
 - **Snapshot Branch**: `GET /conversation/{branch_id}/events` - Inspect prompts, intents, and generated APIs
 - **Genesis Smoke Test**: `POST /conversation/genesis` - Run the canonical echo demonstration
 
-#### Conversation Canvas & Receipts
+### Conversation Canvas & Receipts
 - Append each exchange to `conversation.md` with:
   ```bash
   ./scripts/log_conversation.sh "project-scanner" <branch_id> prompt.txt response.json receipts.txt
@@ -60,6 +60,24 @@ sudo ./deploy.sh
   ./scripts/open_canvas.sh
   ```
   This spins up tmux sessions (`one_engine`, `one_engine_canvas_server`) if needed. Attach to them for live logs.
+
+### Graph UI: Timeline (Ordinal) and Templates
+- Start Graph UI:
+  ```bash
+  ENGINE_BRANCH_ID=$(cat out_one_engine/branch_id.txt) cargo run --bin graph_ui
+  ```
+- Timeline slider (ordinal):
+  - Use the slider labeled `Events: K/N` to choose how many events (K) from the start to include.
+  - Move the slider, then click Load/Reload to re-fetch/rebuild the graph using only the first K events.
+  - Reset sets K back to N.
+  - This is ordinal-based (no timestamps) and uses manual refresh.
+- Templates panel:
+  - Toggle "Templates" in the top bar; a panel in the right shows curated templates.
+  - Actions per template:
+    - Define: sends a definition prompt (persistent API)
+    - Approve: sends `Approve pattern '<name>'`
+    - Call: enter parameters (if any) and send a call prompt
+  - After sending a prompt, click Load/Reload to refresh the graph. No auto-refresh.
 
 ### Governance Automation
 Run the turnkey governance check (engine must be running locally):

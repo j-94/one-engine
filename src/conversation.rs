@@ -72,7 +72,15 @@ impl ConversationService {
                     .get_api(branch_id, &spec.name)
                     .await
                     .ok_or_else(|| anyhow!("API '{}' not found in branch", spec.name))?;
-                let output = api.execute(&spec.arguments)?;
+                // handle counter stateful template
+                let output = match api.logic {
+                    crate::branch::ApiLogic::Counter => {
+                        let count = self.branches.inc_counter(branch_id, &spec.name).await;
+                        count.to_string()
+                    }
+                    _ => api.execute(&spec.arguments)?,
+                };
+                // Record call and response
                 self.branches
                     .record_event(
                         branch_id,
@@ -81,12 +89,36 @@ impl ConversationService {
                         },
                     )
                     .await;
+                self.branches
+                    .record_event(
+                        branch_id,
+                        BranchEvent::ApiResponse {
+                            name: spec.name.clone(),
+                            output: output.clone(),
+                        },
+                    )
+                    .await;
+                // Data-flow inference: if previous output equals any current argument value
+                if let Some((from_api, last_out)) = self.branches.get_last_output(branch_id).await {
+                    if spec.arguments.values().any(|v| v == &last_out) {
+                        self.branches
+                            .record_data_flow(branch_id, from_api, spec.name.clone())
+                            .await;
+                    }
+                }
+                // Update last output
+                self.branches
+                    .set_last_output(branch_id, spec.name.clone(), output.clone())
+                    .await;
+
                 Ok(ConversationEffect::ApiResponse {
                     name: spec.name,
                     output,
                 })
             }
             ParsedInstruction::ApprovePattern { name } => {
+                // Mark API as persisted if it exists, then record approval intent
+                let _ = self.branches.persist_api(branch_id, &name).await;
                 self.branches
                     .record_event(
                         branch_id,
@@ -123,7 +155,17 @@ fn convert_spec_to_api(spec: &crate::parser::CreateApiSpec) -> Result<GeneratedA
         BehavioralHint::Echo | BehavioralHint::PassThrough => ApiLogic::Echo {
             key: parameters.first().map(|p| p.name.clone()),
         },
-        BehavioralHint::Custom(body) => ApiLogic::Custom { body: body.clone() },
+        BehavioralHint::Custom(body) => {
+            // Map known template names to logic variants
+            match spec.name.to_lowercase().as_str() {
+                "uppercase" => ApiLogic::Uppercase,
+                "concat" => ApiLogic::Concat,
+                "slugify" => ApiLogic::Slugify,
+                "sum" => ApiLogic::Sum,
+                "counter" => ApiLogic::Counter,
+                _ => ApiLogic::Custom { body: body.clone() },
+            }
+        }
     };
 
     Ok(GeneratedApi {

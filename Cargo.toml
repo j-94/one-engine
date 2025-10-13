@@ -12,7 +12,7 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 axum = { version = "0.7", features = ["ws"] }
 tower = "0.4"
-tower-http = { version = "0.5", features = ["cors", "trace"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
@@ -22,7 +22,15 @@ clap = { version = "4.0", features = ["derive"] }
 regex = "1.0"
 sha2 = "0.10"
 tempfile = "3.0"
-reqwest = { version = "0.11", features = ["json"] }
+# Enable blocking for GUI-side fetches
+reqwest = { version = "0.11", features = ["json", "blocking"] }
 url = "2.0"
 semver = "1.0"
 futures-util = { version = "0.3", features = ["sink"] }
+# GUI + graph + fuzzy search
+eframe = { version = "0.24", default-features = true }
+petgraph = "0.6"
+fuzzy-matcher = "0.3"
+# Terminal UI
+ratatui = "0.26"
+crossterm = "0.27"

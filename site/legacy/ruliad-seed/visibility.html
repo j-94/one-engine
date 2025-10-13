@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meta² Engine Visibility</title>
+    <style>
+        body { font-family: monospace; margin: 20px; background: #1a1a1a; color: #00ff00; }
+        .status { padding: 10px; margin: 10px 0; border: 1px solid #333; }
+        .ok { border-color: #00ff00; }
+        .down { border-color: #ff0000; }
+        .endpoint { margin: 5px 0; }
+        button { background: #333; color: #00ff00; border: 1px solid #555; padding: 5px 10px; margin: 5px; }
+        button:hover { background: #555; }
+        pre { background: #000; padding: 10px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <h1>Meta² Engine Dashboard</h1>
+    
+    <div id="status"></div>
+    
+    <h2>Controls</h2>
+    <button onclick="checkStatus()">Refresh Status</button>
+    <button onclick="testEndpoints()">Test All Endpoints</button>
+    <button onclick="showLogs()">Show Logs</button>
+    
+    <h2>Quick Actions</h2>
+    <button onclick="executeCommand('ping')">Ping</button>
+    <button onclick="executeCommand('doctor')">Doctor</button>
+    <button onclick="executeCommand('ports show')">Show Ports</button>
+    
+    <div id="output"></div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8080';
+        
+        async function checkStatus() {
+            const output = document.getElementById('status');
+            output.innerHTML = '<div>Checking status...</div>';
+            
+            const endpoints = [
+                '/',
+                '/version', 
+                '/healthz',
+                '/execute_goal',
+                '/compile_and_run',
+                '/chat/sessions',
+                '/tau'
+            ];
+            
+            let html = '<h3>Engine Status</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(API_BASE + endpoint);
+                    const status = response.status;
+                    const statusClass = status >= 200 && status < 400 ? 'ok' : 'down';
+                    html += `<div class="endpoint ${statusClass}">${endpoint} → ${status}</div>`;
+                } catch (error) {
+                    html += `<div class="endpoint down">${endpoint} → ERROR</div>`;
+                }
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        async function testEndpoints() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<pre>Testing endpoints...</pre>';
+            
+            try {
+                const version = await fetch(API_BASE + '/version').then(r => r.json());
+                output.innerHTML = `<pre>Version: ${JSON.stringify(version, null, 2)}</pre>`;
+            } catch (error) {
+                output.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+        
+        async function executeCommand(cmd) {
+            const output = document.getElementById('output');
+            output.innerHTML = `<pre>Executing: ${cmd}...</pre>`;
+            
+            try {
+                let endpoint = '/api/status';
+                if (cmd === 'doctor') endpoint = '/api/doctor';
+                
+                const response = await fetch(`http://localhost:8888${endpoint}`);
+                const result = await response.json();
+                output.innerHTML = `<pre>${result.output || result.error}</pre>`;
+            } catch (error) {
+                output.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+        
+        async function showLogs() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<pre>Logs would be shown here...</pre>';
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkStatus, 30000);
+        
+        // Initial load
+        checkStatus();
+    </script>
+</body>
+</html>

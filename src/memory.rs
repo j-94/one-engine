@@ -589,6 +589,114 @@ mod tests {
         assert!(memory.pattern_db.active_ghosts.contains_key(&ghost.run_id));
     }
 
+    #[tokio::test]
+    async fn test_crystallization_updates_reflexes_and_persists() {
+        let temp_dir = TempDir::new().unwrap();
+        let mut memory = MemorySystem::new(temp_dir.path().to_path_buf());
+
+        let doc = UtirDocument {
+            task_id: "crystallize".to_string(),
+            description: "Validate crystallization and reflex evolution".to_string(),
+            operations: vec![
+                crate::utir::Operation::Shell {
+                    command: "echo success".to_string(),
+                    timeout: "30s".to_string(),
+                    working_dir: None,
+                    env: HashMap::new(),
+                    allow_network: false,
+                    capture_output: true,
+                },
+                crate::utir::Operation::AssertShellSuccess {
+                    command: "echo verify".to_string(),
+                    timeout: "30s".to_string(),
+                    expected_output: None,
+                },
+            ],
+            policy: None,
+            bits_tracking: None,
+        };
+
+        let mut first_bits = Bits::default();
+        first_bits.permission = 1;
+
+        let mut second_bits = Bits::default();
+        second_bits.permission = 1;
+        second_bits.alignment = 0;
+        second_bits.uncertainty = 1;
+
+        let results = vec![
+            OperationResult {
+                success: true,
+                output: "expected_outcome_achieved".to_string(),
+                bits: first_bits,
+                duration_ms: 1_200,
+                metadata: HashMap::new(),
+            },
+            OperationResult {
+                success: true,
+                output: "verification_passed".to_string(),
+                bits: second_bits,
+                duration_ms: 800,
+                metadata: HashMap::new(),
+            },
+        ];
+
+        let ghost = memory.record_execution(&doc, &results).await.unwrap();
+        let pattern_name = format!("crystallized_{}", ghost.pattern_signature);
+
+        assert!(ghost.crystallization_score > memory.ghost_threshold);
+        assert!(memory
+            .pattern_db
+            .crystallized_patterns
+            .contains_key(&pattern_name));
+
+        let ledger_path = temp_dir.path().join("ledger.jsonl");
+        assert!(tokio::fs::metadata(&ledger_path).await.is_ok());
+
+        let patterns_path = temp_dir.path().join("patterns.json");
+        let persisted = tokio::fs::read_to_string(&patterns_path)
+            .await
+            .expect("patterns.json should exist");
+        let persisted_db: PatternDatabase = serde_json::from_str(&persisted).unwrap();
+        assert!(persisted_db.crystallized_patterns.contains_key(&pattern_name));
+
+        let alignment_trigger = "misalignment_step_1".to_string();
+        let uncertainty_pattern = "uncertainty_step_1".to_string();
+        assert!(memory
+            .pattern_db
+            .innate_reflexes
+            .alignment_triggers
+            .contains(&alignment_trigger));
+        assert!(memory
+            .pattern_db
+            .innate_reflexes
+            .uncertainty_patterns
+            .contains(&uncertainty_pattern));
+
+        let mut rehydrated = MemorySystem::new(temp_dir.path().to_path_buf());
+        rehydrated
+            .load_pattern_database()
+            .await
+            .expect("pattern database should load");
+        assert!(rehydrated
+            .pattern_db
+            .crystallized_patterns
+            .contains_key(&pattern_name));
+
+        let permission_bits = rehydrated.compute_reflexive_bits(
+            "destructive_file_operation",
+            "expected_outcome_achieved",
+            true,
+        );
+        assert_eq!(permission_bits.permission, 1);
+
+        let mut gate_bits = Bits::default();
+        gate_bits.permission = 1;
+        assert!(gate_bits.can_act());
+        gate_bits.delta = 1;
+        assert!(!gate_bits.can_act());
+    }
+
     #[test]
     fn test_reflexive_bits_computation() {
         let memory = MemorySystem::new(PathBuf::from("/tmp"));

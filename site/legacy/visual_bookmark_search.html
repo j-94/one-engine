@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Bookmark Search</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f9f9f9;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-secondary: #7f8c8d;
+            --border-color: #eeeeee;
+            --highlight-color: #ffffa0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--card-background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-controls label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-toggle button {
+            padding: 8px 12px;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .bookmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .bookmark-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bookmark-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bookmark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-image {
+            height: 180px;
+            background-color: #e0e0e0;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .card-image-placeholder {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 40px;
+        }
+
+        .source-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .card-title:hover {
+            text-decoration: underline;
+        }
+
+        .card-url {
+            font-size: 13px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .card-meta {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .list-view .bookmark-card {
+            flex-direction: row;
+            height: 120px;
+        }
+
+        .list-view .card-image {
+            width: 120px;
+            height: auto;
+        }
+
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            background-color: var(--card-background);
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+
+        .file-input-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-input-label:hover {
+            background-color: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .bookmark-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .sort-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .list-view .bookmark-card {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .list-view .card-image {
+                width: 100%;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Visual Bookmark Search</h1>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search your bookmarks..." autocomplete="off">
+            </div>
+            <div class="controls">
+                <div class="stats" id="stats">Loading bookmarks...</div>
+                <div class="sort-controls">
+                    <label for="sort-select">Sort by:</label>
+                    <select id="sort-select">
+                        <option value="date-desc">Date (Newest first)</option>
+                        <option value="date-asc">Date (Oldest first)</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="source">Source</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button id="grid-view-btn" class="active" title="Grid View">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <rect x="1" y="1" width="6" height="6" rx="1"/>
+                                <rect x="9" y="1" width="6" height="6" rx="1"/>
+                                <rect x="1" y="9" width="6" height="6" rx="1"/>
+                                <rect x="9" y="9" width="6" height="6" rx="1"/>
+                            </svg>
+                        </button>
+                        <button id="list-view-btn" title="List View">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <rect x="1" y="1" width="14" height="3" rx="1"/>
+                                <rect x="1" y="6" width="14" height="3" rx="1"/>
+                                <rect x="1" y="11" width="14" height="3" rx="1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div id="results" class="bookmark-grid">
+            <div class="loading">Loading bookmarks...</div>
+        </div>
+    </div>
+
+    <script>
+        // Store all bookmarks
+        let allBookmarks = [];
+        let currentView = 'grid';
+        
+        // Function to extract domain from URL
+        function extractDomain(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return domain.replace('www.', '');
+            } catch (e) {
+                return '';
+            }
+        }
+        
+        // Function to get favicon URL
+        function getFaviconUrl(domain) {
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        }
+        
+        // Function to get a representative image for the bookmark
+        function getImageUrl(url, title) {
+            // For GitHub repositories, use GitHub's social preview image
+            if (url.includes('github.com')) {
+                const parts = url.split('github.com/');
+                if (parts.length > 1) {
+                    const repoPath = parts[1].split('/').slice(0, 2).join('/');
+                    if (repoPath) {
+                        return `https://opengraph.githubassets.com/1/${repoPath}`;
+                    }
+                }
+            }
+            
+            // For other sites, try to use a generic image based on the domain
+            const domain = extractDomain(url);
+            
+            // Return a placeholder image if we can't determine a good image
+            return `https://source.unsplash.com/300x200/?${encodeURIComponent(domain || title || 'website')}`;
+        }
+        
+        // Function to determine source type from URL
+        function determineSource(url, sourceHint) {
+            if (sourceHint) return sourceHint;
+            
+            const domain = extractDomain(url);
+            if (domain.includes('github')) return 'github';
+            if (domain.includes('twitter') || domain.includes('x.com')) return 'twitter';
+            if (domain.includes('youtube')) return 'youtube';
+            if (domain.includes('medium')) return 'medium';
+            if (domain.includes('dev.to')) return 'dev.to';
+            if (domain.includes('stackoverflow')) return 'stackoverflow';
+            
+            return domain.split('.')[0];
+        }
+        
+        // Function to parse the bookmarks HTML file
+        function parseBookmarksFile(html) {
+            // Create a DOM parser
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Find all bookmark links
+            const bookmarkElements = doc.querySelectorAll('a');
+            
+            allBookmarks = Array.from(bookmarkElements).map(link => {
+                const addDate = link.getAttribute('ADD_DATE');
+                let date = null;
+                
+                if (addDate) {
+                    try {
+                        date = new Date(parseInt(addDate) * 1000);
+                    } catch (e) {
+                        // If date parsing fails, leave as null
+                    }
+                }
+                
+                const url = link.getAttribute('href') || '';
+                const title = link.textContent || 'Untitled Bookmark';
+                const domain = extractDomain(url);
+                
+                // Try to extract source from parent element text or URL
+                const parentText = link.parentElement ? link.parentElement.textContent : '';
+                let source = '';
+                
+                if (parentText.includes('github')) source = 'github';
+                else if (parentText.includes('twitter')) source = 'twitter';
+                else source = determineSource(url);
+                
+                return {
+                    title: title,
+                    url: url,
+                    date: date,
+                    domain: domain,
+                    source: source,
+                    imageUrl: getImageUrl(url, title)
+                };
+            });
+            
+            document.getElementById('stats').textContent = `${allBookmarks.length} bookmarks loaded`;
+            
+            // Initial sort and display of all bookmarks
+            sortAndDisplayBookmarks();
+        }
+        
+        // Function to load the bookmarks file
+        async function loadBookmarks() {
+            try {
+                // Try to load the bookmarks file directly
+                const response = await fetch('bookmarks_from_jsonl.html');
+                if (!response.ok) {
+                    throw new Error('Could not load bookmarks file');
+                }
+                const html = await response.text();
+                parseBookmarksFile(html);
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+                
+                // If direct loading fails, try to read the file from the filesystem
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', 'bookmarks_from_jsonl.html', true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                parseBookmarksFile(xhr.responseText);
+                            } else {
+                                document.getElementById('results').innerHTML = `
+                                    <div class="no-results">
+                                        <p>Could not load bookmarks file. Please make sure "bookmarks_from_jsonl.html" is in the same directory as this file.</p>
+                                        <div class="file-input-container">
+                                            <label for="file-input" class="file-input-label">Select Bookmarks File</label>
+                                            <input type="file" id="file-input" accept=".html">
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                document.getElementById('file-input').addEventListener('change', handleFileSelect);
+                            }
+                        }
+                    };
+                    xhr.send();
+                } catch (e) {
+                    document.getElementById('results').innerHTML = `
+                        <div class="no-results">
+                            <p>Could not load bookmarks file. Please select your bookmarks file manually.</p>
+                            <div class="file-input-container">
+                                <label for="file-input" class="file-input-label">Select Bookmarks File</label>
+                                <input type="file" id="file-input" accept=".html">
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('file-input').addEventListener('change', handleFileSelect);
+                }
+            }
+        }
+        
+        // Function to handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseBookmarksFile(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+        
+        // Function to sort bookmarks
+        function sortBookmarks(bookmarks, sortOption) {
+            switch (sortOption) {
+                case 'date-desc':
+                    return [...bookmarks].sort((a, b) => {
+                        if (!a.date) return 1;
+                        if (!b.date) return -1;
+                        return b.date - a.date;
+                    });
+                case 'date-asc':
+                    return [...bookmarks].sort((a, b) => {
+                        if (!a.date) return 1;
+                        if (!b.date) return -1;
+                        return a.date - b.date;
+                    });
+                case 'title-asc':
+                    return [...bookmarks].sort((a, b) => 
+                        (a.title || '').localeCompare(b.title || '')
+                    );
+                case 'title-desc':
+                    return [...bookmarks].sort((a, b) => 
+                        (b.title || '').localeCompare(a.title || '')
+                    );
+                case 'source':
+                    return [...bookmarks].sort((a, b) => 
+                        (a.source || '').localeCompare(b.source || '')
+                    );
+                default:
+                    return bookmarks;
+            }
+        }
+        
+        // Function to create a bookmark card
+        function createBookmarkCard(bookmark) {
+            const card = document.createElement('div');
+            card.className = 'bookmark-card';
+            
+            // Create image section
+            const imageSection = document.createElement('div');
+            imageSection.className = 'card-image';
+            
+            // Try to load the image, fallback to placeholder if it fails
+            const img = new Image();
+            img.onload = function() {
+                imageSection.style.backgroundImage = `url('${bookmark.imageUrl}')`;
+            };
+            img.onerror = function() {
+                // If image fails to load, use a placeholder with the first letter of the title
+                const placeholder = document.createElement('div');
+                placeholder.className = 'card-image-placeholder';
+                placeholder.textContent = (bookmark.title && bookmark.title[0]) || '?';
+                imageSection.appendChild(placeholder);
+            };
+            img.src = bookmark.imageUrl;
+            
+            // Add source badge
+            if (bookmark.source) {
+                const sourceBadge = document.createElement('div');
+                sourceBadge.className = 'source-badge';
+                sourceBadge.textContent = bookmark.source;
+                imageSection.appendChild(sourceBadge);
+            }
+            
+            // Create content section
+            const contentSection = document.createElement('div');
+            contentSection.className = 'card-content';
+            
+            // Add title
+            const title = document.createElement('a');
+            title.className = 'card-title';
+            title.href = bookmark.url;
+            title.textContent = bookmark.title || 'Untitled Bookmark';
+            title.target = '_blank';
+            contentSection.appendChild(title);
+            
+            // Add URL
+            const url = document.createElement('div');
+            url.className = 'card-url';
+            url.textContent = bookmark.url;
+            contentSection.appendChild(url);
+            
+            // Add metadata
+            const meta = document.createElement('div');
+            meta.className = 'card-meta';
+            
+            // Add date
+            if (bookmark.date) {
+                const date = document.createElement('div');
+                date.textContent = bookmark.date.toLocaleDateString();
+                meta.appendChild(date);
+            }
+            
+            // Add domain
+            if (bookmark.domain) {
+                const domain = document.createElement('div');
+                domain.textContent = bookmark.domain;
+                meta.appendChild(domain);
+            }
+            
+            contentSection.appendChild(meta);
+            
+            // Assemble the card
+            card.appendChild(imageSection);
+            card.appendChild(contentSection);
+            
+            return card;
+        }
+        
+        // Function to display bookmarks
+        function displayBookmarks(bookmarks) {
+            const resultsElement = document.getElementById('results');
+            
+            if (bookmarks.length === 0) {
+                resultsElement.innerHTML = '<div class="no-results">No bookmarks found matching your search.</div>';
+                return;
+            }
+            
+            resultsElement.innerHTML = '';
+            
+            bookmarks.forEach(bookmark => {
+                const card = createBookmarkCard(bookmark);
+                resultsElement.appendChild(card);
+            });
+        }
+        
+        // Function to search bookmarks
+        function searchBookmarks(query) {
+            if (!query) {
+                sortAndDisplayBookmarks();
+                return;
+            }
+            
+            const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+            
+            const results = allBookmarks.filter(bookmark => {
+                const titleLower = (bookmark.title || '').toLowerCase();
+                const urlLower = (bookmark.url || '').toLowerCase();
+                const sourceLower = (bookmark.source || '').toLowerCase();
+                const domainLower = (bookmark.domain || '').toLowerCase();
+                
+                return searchTerms.every(term => 
+                    titleLower.includes(term) || 
+                    urlLower.includes(term) || 
+                    sourceLower.includes(term) || 
+                    domainLower.includes(term)
+                );
+            });
+            
+            const sortOption = document.getElementById('sort-select').value;
+            const sortedResults = sortBookmarks(results, sortOption);
+            
+            displayBookmarks(sortedResults);
+            document.getElementById('stats').textContent = `Found ${results.length} of ${allBookmarks.length} bookmarks`;
+            
+            // Highlight search terms in the results
+            highlightSearchTerms(searchTerms);
+        }
+        
+        // Function to sort and display bookmarks
+        function sortAndDisplayBookmarks() {
+            const sortOption = document.getElementById('sort-select').value;
+            const query = document.getElementById('search-input').value;
+            
+            let bookmarksToDisplay = allBookmarks;
+            
+            // If there's a search query, filter the bookmarks
+            if (query) {
+                const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+                
+                bookmarksToDisplay = allBookmarks.filter(bookmark => {
+                    const titleLower = (bookmark.title || '').toLowerCase();
+                    const urlLower = (bookmark.url || '').toLowerCase();
+                    const sourceLower = (bookmark.source || '').toLowerCase();
+                    const domainLower = (bookmark.domain || '').toLowerCase();
+                    
+                    return searchTerms.every(term => 
+                        titleLower.includes(term) || 
+                        urlLower.includes(term) || 
+                        sourceLower.includes(term) || 
+                        domainLower.includes(term)
+                    );
+                });
+                
+                document.getElementById('stats').textContent = `Found ${bookmarksToDisplay.length} of ${allBookmarks.length} bookmarks`;
+                
+                // Highlight search terms after display
+                setTimeout(() => highlightSearchTerms(searchTerms), 0);
+            } else {
+                document.getElementById('stats').textContent = `${allBookmarks.length} bookmarks loaded`;
+            }
+            
+            const sortedBookmarks = sortBookmarks(bookmarksToDisplay, sortOption);
+            displayBookmarks(sortedBookmarks);
+        }
+        
+        // Function to highlight search terms
+        function highlightSearchTerms(searchTerms) {
+            if (!searchTerms || searchTerms.length === 0) return;
+            
+            const bookmarkItems = document.querySelectorAll('.bookmark-card');
+            
+            bookmarkItems.forEach(item => {
+                const title = item.querySelector('.card-title');
+                const url = item.querySelector('.card-url');
+                
+                if (title) {
+                    let titleText = title.textContent;
+                    searchTerms.forEach(term => {
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        titleText = titleText.replace(regex, '<span class="highlight">$1</span>');
+                    });
+                    title.innerHTML = titleText;
+                }
+                
+                if (url) {
+                    let urlText = url.textContent;
+                    searchTerms.forEach(term => {
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        urlText = urlText.replace(regex, '<span class="highlight">$1</span>');
+                    });
+                    url.innerHTML = urlText;
+                }
+            });
+        }
+        
+        // Function to toggle view mode
+        function toggleViewMode(mode) {
+            const resultsElement = document.getElementById('results');
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            
+            currentView = mode;
+            
+            if (mode === 'grid') {
+                resultsElement.className = 'bookmark-grid';
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            } else {
+                resultsElement.className = 'bookmark-grid list-view';
+                gridBtn.classList.remove('active');
+                listBtn.classList.add('active');
+            }
+        }
+        
+        // Event listener for search input
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            searchBookmarks(e.target.value);
+        });
+        
+        // Event listener for sort select
+        document.getElementById('sort-select').addEventListener('change', function() {
+            sortAndDisplayBookmarks();
+        });
+        
+        // Event listeners for view toggle buttons
+        document.getElementById('grid-view-btn').addEventListener('click', function() {
+            toggleViewMode('grid');
+        });
+        
+        document.getElementById('list-view-btn').addEventListener('click', function() {
+            toggleViewMode('list');
+        });
+        
+        // Load bookmarks when the page loads
+        window.addEventListener('DOMContentLoaded', loadBookmarks);
+    </script>
+</body>
+</html>

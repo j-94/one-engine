@@ -2,33 +2,65 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [ main, master, trunk, develop, '*' ]
   pull_request:
 
 jobs:
-  build:
+  build-test-journey:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Install jq dependency
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install utilities
+        run: sudo apt-get update && sudo apt-get install -y jq lsof
 
       - name: Cargo fmt
         run: cargo fmt --all -- --check
 
       - name: Cargo clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Cargo build
+        run: cargo build --locked
 
       - name: Cargo test
-        run: cargo test
+        run: cargo test --all --all-features
 
-      - name: Conversational smoke test
-        run: timeout 90 ./scripts/conversation_demo.sh
+      - name: Make journey script executable
+        run: chmod +x scripts/ci_user_journey.sh
+
+      - name: Run user journey
+        run: ./scripts/ci_user_journey.sh
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-user-journey-report
+          path: |
+            logs/ci_user_journey_report.md
+            /tmp/one_engine_ci_server.*.log
+
+      - name: Summarize
+        if: always()
+        run: |
+          echo "# One Engine CI Summary" >> $GITHUB_STEP_SUMMARY
+          if [ -f logs/ci_user_journey_report.md ]; then
+            echo "## User Journey Report" >> $GITHUB_STEP_SUMMARY
+            tail -n +1 logs/ci_user_journey_report.md | sed -e 's/\r$//' >> $GITHUB_STEP_SUMMARY || true
+          else
+            echo "(no report found)" >> $GITHUB_STEP_SUMMARY
+          fi

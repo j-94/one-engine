@@ -1,0 +1,72 @@
+{
+  "patterns": [
+    {
+      "id": "conversational-api-evolution",
+      "title": "Conversational API Evolution",
+      "summary": "Prompt → ParseIntent → Create/Call → Approve → Persist → Autodoc → Reuse.",
+      "tags": ["loop", "mvs"],
+      "docs_path": "docs/patterns/conversational-api-evolution.html",
+      "pinned": true,
+      "level": "loop"
+    },
+    {
+      "id": "hitl-governance",
+      "title": "HITL Governance",
+      "summary": "Human-in-the-loop approval gates pattern persistence.",
+      "tags": ["governance"],
+      "docs_path": "docs/patterns/hitl-governance.html",
+      "pinned": true,
+      "level": "governance"
+    },
+    {
+      "id": "autodoc-navigation",
+      "title": "Autodoc Navigation",
+      "summary": "Endpoints surfaced as nodes with details and examples.",
+      "tags": ["docs"],
+      "docs_path": "docs/patterns/autodoc-navigation.html",
+      "pinned": false,
+      "level": "docs"
+    },
+    {
+      "id": "emergent-string-ops",
+      "title": "Emergent String Ops",
+      "summary": "uppercase/reverse/slugify/replace/concat/counter emerge and persist.",
+      "tags": ["string", "demo"],
+      "docs_path": "docs/patterns/emergent-string-ops.html",
+      "pinned": false,
+      "level": "demo"
+    }
+  ],
+  "features": [
+    {
+      "id": "graph-ui-timeline",
+      "title": "Graph UI Timeline",
+      "summary": "Ordinal slider to bound events (K/N).",
+      "docs_path": "docs/features/graph-ui-timeline.html",
+      "pinned": true
+    },
+    {
+      "id": "templates-panel",
+      "title": "Templates Panel",
+      "summary": "Define/Approve/Call curated APIs.",
+      "docs_path": "docs/features/templates-panel.html",
+      "pinned": true
+    },
+    {
+      "id": "conversation-canvas",
+      "title": "Conversation Canvas",
+      "summary": "HTML canvas of logged conversations.",
+      "docs_path": "docs/features/conversation-canvas.html",
+      "pinned": false
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ac1",
+      "title": "Timeline Landed",
+      "description": "Ordinal K/N in Graph UI.",
+      "target_id": "graph-ui-timeline",
+      "pinned": true
+    }
+  ]
+}

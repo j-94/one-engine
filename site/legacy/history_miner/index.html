@@ -1,0 +1,68 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>URLUX Cockpit</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:24px}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .card{border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+  h1{margin:0 0 12px}h2{font-size:16px;margin:16px 0 8px}
+  .kv{font-size:22px}
+  table{border-collapse:collapse;width:100%} td,th{padding:6px;border-bottom:1px solid #eee;font-size:14px}
+  code{background:#f6f8fa;padding:2px 6px;border-radius:6px}
+</style>
+<h1>URLUX Cockpit</h1>
+<div id="cards" class="grid"></div>
+
+<h2>Next Nudges</h2>
+<div id="nudges">—</div>
+
+<h2>Recent Runs</h2>
+<table id="runs"><thead>
+  <tr><th align="left">When (UTC)</th><th align="left">Branch</th><th align="left">Exit</th><th align="left">Elapsed(s)</th></tr>
+</thead><tbody></tbody></table>
+
+<h2>Top Learnings</h2>
+<ul id="learn"><li>—</li></ul>
+
+<script>
+(async ()=>{
+  function H(t,v){return `<div class="card"><div style="font-size:14px;color:#374151">${t}</div><div class="kv">${v}</div></div>`}
+  try {
+    const ov = await fetch('../.urlux/overview.json',{cache:'no-store'}).then(r=>r.json());
+    const cards = [
+      H('Runs', ov.window?.runs ?? 0),
+      H('Last', ov.window?.last_ts ?? '—'),
+      H('Emit rate', ((ov.topline?.emit_rate||0)*100).toFixed(1)+'%'),
+      H('MTTP p50/p95', (ov.topline?.mttp_p50 ?? '—')+' / '+(ov.topline?.mttp_p95 ?? '—')),
+      H('γ p50', (ov.topline?.gamma_p50 ?? 0).toFixed(2)),
+      H('Coverage', ((ov.context?.coverage_ratio||0)*100).toFixed(1)+'%')
+    ];
+    document.getElementById('cards').innerHTML = cards.join('');
+  } catch (e) {}
+
+  // Nudges
+  try {
+    const n = await fetch('../.urlux/nudges.json',{cache:'no-store'}).then(r=>r.json());
+    document.getElementById('nudges').innerHTML = '<ul>' + n.map(x =>
+      `<li><b>${x.lane}</b> → <code>${x.file}</code> — ${x.action} <i>(why: ${x.why})</i></li>`).join('') + '</ul>';
+  } catch(e) {}
+
+  // Recent runs
+  try {
+    const raw = await fetch('../.urlux/ledger.jsonl',{cache:'no-store'}).then(r=>r.text());
+    const rows = raw.trim().split('\n').slice(-200).map(l=>{try{return JSON.parse(l)}catch{return null}}).filter(Boolean);
+    const cps = rows.filter(r=>r.type==='task.checkpoint').slice(-20).reverse();
+    const tr = cps.map(r=>`<tr>
+      <td>${r.ts||''}</td><td>${r.branch||r.taskgraph_id||'—'}</td>
+      <td>${(r.checks&&r.checks.exit_code===0)?'0':'≠0'}</td>
+      <td>${(r.telemetry&&r.telemetry.elapsed_sec)||'—'}</td></tr>`).join('');
+    document.querySelector('#runs tbody').innerHTML = tr || `<tr><td colspan=4>—</td></tr>`;
+  } catch(e) {}
+
+  // Learnings
+  try {
+    const L = await fetch('../.urlux/learn_top3.json',{cache:'no-store'}).then(r=>r.json());
+    document.getElementById('learn').innerHTML = L.map(x =>
+      `<li><b>${x.topic}</b> — ${x.insight} <i>(${x.when})</i></li>`).join('');
+  } catch(e) {}
+})();
+</script>

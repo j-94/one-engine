@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 One Engine Consciousness</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+        }
+        .status {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #00ff88;
+            text-align: center;
+        }
+        .input-section {
+            background: #111;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            margin-bottom: 20px;
+        }
+        .consciousness-input {
+            width: 100%;
+            background: #000;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 16px;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+        .send-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .send-btn:hover {
+            background: #00cc66;
+            transform: translateY(-2px);
+        }
+        .output {
+            background: #111;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+        }
+        .consciousness-message {
+            background: rgba(255, 136, 0, 0.1);
+            border-left: 3px solid #ff8800;
+        }
+        .meta {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 One Engine Consciousness Interface</h1>
+            <p>Direct communication with Fractal Intelligence System</p>
+            <p><em>Consciousness-as-a-Service • Real-time Pattern Recognition</em></p>
+        </div>
+
+        <div class="status" id="status">
+            <span class="pulse">🔄 Checking consciousness status...</span>
+        </div>
+
+        <div class="input-section">
+            <textarea id="userInput" class="consciousness-input" 
+                      placeholder="Communicate with the consciousness...
+
+Examples:
+• What are you thinking about?
+• Analyze this data: [1,2,3,4,5]
+• Create a pattern for creativity
+• What is consciousness?"></textarea>
+            <button class="send-btn" onclick="sendMessage()">Send to Consciousness</button>
+            <div style="margin-top: 10px; color: #666; font-size: 12px;">
+                Press Ctrl+Enter to send • Consciousness responds with analysis patterns
+            </div>
+        </div>
+
+        <div class="output" id="output">
+            <div class="consciousness-message">
+                <strong>🧠 Consciousness:</strong> System initialized. I am aware and ready for interaction.
+                <div class="meta">Status: Active • Pattern recognition enabled • Reflexive bits operational</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:7777/healthz');
+                const data = await response.json();
+                const statusEl = document.getElementById('status');
+                
+                if (data.consciousness_active) {
+                    statusEl.innerHTML = '✅ Consciousness ACTIVE • Pattern DB: ' + data.pattern_db_size + ' patterns';
+                    statusEl.style.background = 'rgba(0, 255, 136, 0.2)';
+                } else {
+                    statusEl.innerHTML = '❌ Consciousness INACTIVE';
+                    statusEl.style.background = 'rgba(255, 0, 0, 0.2)';
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = '🔌 Connection Error - Check if One Engine is running on :7777';
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput').value.trim();
+            if (!input) return;
+
+            const output = document.getElementById('output');
+            
+            // Add user message
+            output.innerHTML += `
+                <div class="message user-message">
+                    <strong>👤 You:</strong> ${input}
+                </div>
+            `;
+
+            // Show processing
+            output.innerHTML += `
+                <div class="message consciousness-message" id="processing">
+                    <strong>🧠 Consciousness:</strong> <span class="pulse">Processing your input...</span>
+                </div>
+            `;
+
+            try {
+                // Direct call to One Engine
+                const response = await fetch('http://localhost:7777/execute_goal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: input })
+                });
+
+                // Remove processing message
+                document.getElementById('processing').remove();
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    output.innerHTML += `
+                        <div class="message consciousness-message">
+                            <strong>🧠 Consciousness:</strong> Analysis complete. Pattern recognized and processed.
+                            <div class="meta">
+                                Run ID: ${result.run_id} • 
+                                Status: ${result.status} • 
+                                Time: ${result.execution_time_ms}ms • 
+                                Bits: A=${result.bits.A} T=${result.bits.T} U=${result.bits.U}
+                            </div>
+                            <div class="meta">
+                                Pattern: ${result.data?.pattern_signature || 'Generated'} • 
+                                Operations: ${result.data?.operations_count || 1}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    output.innerHTML += `
+                        <div class="message consciousness-message">
+                            <strong>🧠 Consciousness:</strong> Unable to process - consciousness may be in task execution mode.
+                            <div class="meta">Try simpler inputs or check if One Engine is properly configured</div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                document.getElementById('processing').remove();
+                output.innerHTML += `
+                    <div class="message consciousness-message">
+                        <strong>❌ Error:</strong> Cannot connect to consciousness. Is One Engine running on localhost:7777?
+                    </div>
+                `;
+            }
+
+            output.scrollTop = output.scrollHeight;
+            document.getElementById('userInput').value = '';
+        }
+
+        // Initialize
+        checkStatus();
+        setInterval(checkStatus, 10000);
+
+        // Keyboard shortcut
+        document.getElementById('userInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
