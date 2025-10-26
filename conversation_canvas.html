@@ -11,6 +11,10 @@
       color: #f1f5f9;
     }
     header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
       background: linear-gradient(90deg, #111827, #1f2937);
       padding: 1.2rem 2rem;
       border-bottom: 1px solid #1f2937;
@@ -22,6 +26,13 @@
       text-transform: uppercase;
       color: #38bdf8;
     }
+    header .status {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
     .container {
       display: flex;
       gap: 1rem;
@@ -29,7 +40,7 @@
       height: calc(100vh - 72px);
       box-sizing: border-box;
     }
-    .column {
+    .column { 
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -55,6 +66,13 @@
       overflow-y: auto;
       line-height: 1.5;
     }
+    .empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      opacity: 0.72;
+    }
     pre {
       font-family: 'JetBrains Mono', 'Fira Code', monospace;
       font-size: 0.85rem;
@@ -77,6 +95,7 @@
 <body>
   <header>
     <h1>Fractal Intelligence — Conversation Canvas</h1>
+    <span class="status" id="status">loading conversation…</span>
   </header>
   <div class="container">
     <div class="column" id="prompts">
@@ -93,34 +112,69 @@
     </div>
   </div>
   <script>
+    const REFRESH_INTERVAL_MS = 5000;
+    const status = document.getElementById('status');
+    const prompts = document.querySelector('#prompts .content');
+    const responses = document.querySelector('#responses .content');
+    const receipts = document.querySelector('#receipts .content');
+
+    function renderEmptyState(message) {
+      const safeMessage = message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const template = `<div class="empty"><pre>${safeMessage}</pre></div>`;
+      prompts.innerHTML = template;
+      responses.innerHTML = template;
+      receipts.innerHTML = template;
+    }
+
     async function loadConversation() {
-      const response = await fetch('conversation.md');
-      const text = await response.text();
-      const sections = text.split(/(^###\s.*$)/m).slice(1);
-      const prompts = document.querySelector('#prompts .content');
-      const responses = document.querySelector('#responses .content');
-      const receipts = document.querySelector('#receipts .content');
+      try {
+        status.textContent = 'refreshing…';
+        const response = await fetch('conversation.md', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`fetch failed (${response.status})`);
+        }
+        const text = await response.text();
+        const sections = text.split(/(^###\s.*$)/m).slice(1);
 
-      prompts.innerHTML = '';
-      responses.innerHTML = '';
-      receipts.innerHTML = '';
+        prompts.innerHTML = '';
+        responses.innerHTML = '';
+        receipts.innerHTML = '';
 
-      for (let i = 0; i < sections.length; i += 2) {
-        const title = sections[i];
-        const body = sections[i + 1];
-        if (!body) continue;
+        for (let i = 0; i < sections.length; i += 2) {
+          const title = sections[i];
+          const body = sections[i + 1];
+          if (!body) {
+            continue;
+          }
 
-        const prompt = body.match(/#### Prompt\n```([\s\S]*?)```/);
-        const response = body.match(/#### Engine Response\n```([\s\S]*?)```/);
-        const receipt = body.match(/#### Receipts\n```([\s\S]*?)```/);
+          const prompt = body.match(/#### Prompt\n```([\s\S]*?)```/);
+          const responseBlock = body.match(/#### Engine Response\n```([\s\S]*?)```/);
+          const receipt = body.match(/#### Receipts\n```([\s\S]*?)```/);
 
-        prompts.innerHTML += `<h3>${title.trim()}</h3><pre>${prompt ? prompt[1].trim() : ''}</pre>`;
-        responses.innerHTML += `<h3>${title.trim()}</h3><pre>${response ? response[1].trim() : ''}</pre>`;
-        receipts.innerHTML += `<h3>${title.trim()}</h3><pre>${receipt ? receipt[1].trim() : ''}</pre>`;
+          prompts.innerHTML += `<h3>${title.trim()}</h3><pre>${prompt ? prompt[1].trim() : ''}</pre>`;
+          responses.innerHTML += `<h3>${title.trim()}</h3><pre>${responseBlock ? responseBlock[1].trim() : ''}</pre>`;
+          receipts.innerHTML += `<h3>${title.trim()}</h3><pre>${receipt ? receipt[1].trim() : ''}</pre>`;
+        }
+
+        if (!prompts.innerHTML.trim()) {
+          renderEmptyState('conversation.md is present but contains no logged exchanges yet.');
+        }
+
+        const timestamp = new Date().toLocaleTimeString();
+        status.textContent = `updated ${timestamp}`;
+      } catch (error) {
+        status.textContent = 'offline';
+        renderEmptyState(`Unable to load conversation.md — ${error.message}`);
       }
     }
 
     loadConversation();
+    setInterval(() => {
+      if (document.hidden) {
+        return;
+      }
+      loadConversation();
+    }, REFRESH_INTERVAL_MS);
   </script>
 </body>
 </html>
