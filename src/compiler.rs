@@ -156,6 +156,24 @@ impl UtirCompiler {
                     .await?
             }
 
+            Operation::HttpPost {
+                url,
+                headers,
+                body,
+                timeout: timeout_str,
+                max_response_size,
+            } => {
+                self.execute_http_post(
+                    url,
+                    headers,
+                    body.as_deref(),
+                    timeout_str,
+                    max_response_size,
+                    context,
+                )
+                .await?
+            }
+
             Operation::GitPatch {
                 repo_path,
                 patch_content,
@@ -349,6 +367,55 @@ impl UtirCompiler {
         let mut request = client.get(url);
         for (key, value) in headers {
             request = request.header(key, value);
+        }
+
+        match request.send().await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    match response.text().await {
+                        Ok(text) => {
+                            let max_bytes = self.parse_size(max_response_size)?;
+                            if text.len() > max_bytes as usize {
+                                Ok((false, "Response too large".to_string()))
+                            } else {
+                                Ok((true, text))
+                            }
+                        }
+                        Err(e) => Ok((false, format!("Failed to read response: {}", e))),
+                    }
+                } else {
+                    Ok((false, format!("HTTP error: {}", response.status())))
+                }
+            }
+            Err(e) => Ok((false, format!("Request failed: {}", e))),
+        }
+    }
+
+    async fn execute_http_post(
+        &self,
+        url: &str,
+        headers: &HashMap<String, String>,
+        body: Option<&str>,
+        timeout_str: &str,
+        max_response_size: &str,
+        _context: &ExecutionContext,
+    ) -> Result<(bool, String)> {
+        if !self.is_url_allowed(url)? {
+            return Ok((false, "URL not in allowed domains".to_string()));
+        }
+
+        let timeout_duration = self.parse_duration(timeout_str)?;
+        let client = reqwest::Client::builder()
+            .timeout(timeout_duration)
+            .build()?;
+
+        let mut request = client.post(url);
+        for (key, value) in headers {
+            request = request.header(key, value);
+        }
+
+        if let Some(body) = body {
+            request = request.body(body.to_string());
         }
 
         match request.send().await {
@@ -703,7 +770,7 @@ operations:
 
         let utir_yaml = r#"
 task_id: "test-dangerous"
-description: "Dangerous command test"  
+description: "Dangerous command test"
 operations:
   - type: "shell"
     command: "rm -rf /"
@@ -715,5 +782,63 @@ operations:
         assert_eq!(results.len(), 1);
         assert!(!results[0].success);
         assert!(results[0].output.contains("blocked by security"));
+    }
+
+    #[tokio::test]
+    async fn test_http_post_execution() {
+        use axum::{routing::post, Json, Router};
+        use serde_json::{json, Value};
+        use std::time::Duration;
+
+        async fn echo(Json(payload): Json<Value>) -> Json<Value> {
+            let message = payload
+                .get("message")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            Json(json!({ "received": message }))
+        }
+
+        let app = Router::new().route("/echo", post(echo));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let server = axum::serve(listener, app);
+        let server_handle = tokio::spawn(async move {
+            server.await.expect("server error");
+        });
+
+        // Give the server a moment to start
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        let mut compiler = UtirCompiler::new(vec!["127.0.0.1".to_string()]).unwrap();
+
+        let utir_yaml = format!(
+            r#"
+task_id: "test-http-post"
+description: "Send JSON payload"
+operations:
+  - type: "http.post"
+    url: "http://{}/echo"
+    headers:
+      Content-Type: "application/json"
+    body: |
+      {{"message":"ping"}}
+"#,
+            addr
+        );
+
+        let doc = parse_utir(&utir_yaml).unwrap();
+        let results = compiler.execute(&doc).await.unwrap();
+
+        assert_eq!(results.len(), 1);
+        assert!(
+            results[0].success,
+            "HTTP POST should succeed: {}",
+            results[0].output
+        );
+
+        let response: Value = serde_json::from_str(&results[0].output).unwrap();
+        assert_eq!(response["received"], "ping");
+
+        server_handle.abort();
     }
 }

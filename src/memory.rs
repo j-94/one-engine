@@ -416,6 +416,7 @@ impl MemorySystem {
                 crate::utir::Operation::FsRead { .. } => "fs_read",
                 crate::utir::Operation::FsWrite { .. } => "fs_write",
                 crate::utir::Operation::HttpGet { .. } => "http_get",
+                crate::utir::Operation::HttpPost { .. } => "http_post",
                 crate::utir::Operation::GitPatch { .. } => "git_patch",
                 crate::utir::Operation::AssertFileExists { .. } => "assert_file",
                 crate::utir::Operation::AssertShellSuccess { .. } => "assert_shell",

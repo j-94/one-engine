@@ -75,6 +75,19 @@ pub enum Operation {
         max_response_size: String,
     },
 
+    #[serde(rename = "http.post")]
+    HttpPost {
+        url: String,
+        #[serde(default)]
+        headers: HashMap<String, String>,
+        #[serde(default)]
+        body: Option<String>,
+        #[serde(default = "default_timeout")]
+        timeout: String,
+        #[serde(default = "default_max_response")]
+        max_response_size: String,
+    },
+
     #[serde(rename = "git.patch")]
     GitPatch {
         repo_path: String,
