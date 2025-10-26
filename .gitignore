@@ -9,3 +9,6 @@ node_modules/
 docs/docs/
 
 /target
+.graphlogue/
+DELIVERABLES.md
+__pycache__/

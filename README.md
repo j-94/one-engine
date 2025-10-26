@@ -88,6 +88,52 @@ Run the turnkey governance check (engine must be running locally):
 
 The script asks the engine to generate and execute a `governance_check` API that runs `cargo fmt`, `cargo clippy`, `cargo test`, verifies `conversation.md`, and stores a detailed receipt under `logs/`. Results are summarised in the generated report and appended to `conversation.md` for easy review.
 
+## 🧰 Graphlogue Terminal Tools
+
+The repository now ships with a lightweight terminal experience for tracking live runs, surfacing stakeholder deliverables, and chatting with the engine asynchronously.
+
+### Install prerequisites
+
+The CLI uses standard Unix tooling. Install `jq` and `fzf` if they are not already available:
+
+```bash
+brew install jq fzf          # macOS
+sudo apt-get install jq fzf  # Debian/Ubuntu
+```
+
+### Inspect a run graph
+
+```bash
+# Stream events from progress.sse for an existing run
+./bin/graphlogue run <RUN_ID>
+
+# Load a sample timeline without connecting to an engine
+./bin/graphlogue demo
+```
+
+Every event is persisted under `.graphlogue/` as TSV files (`nodes.tsv`, `edges.tsv`, `deliverables.tsv`). Deliverable events such as `deliverable`, `receipt.write`, `deeplink`, and `kpi` are automatically tracked.
+
+### Deliverables feed and exports
+
+```bash
+# Open the fuzzy finder feed (falls back to a simple list when fzf is missing)
+./bin/graphlogue deliver
+
+# Generate a stakeholder-ready summary document
+./bin/graphlogue export --output DELIVERABLES.md
+```
+
+The deliverables feed lets you open links, inspect receipts, and review generated tables directly from the terminal.
+
+### Async SWE-style chat
+
+```bash
+# Stream chat tokens from /chat when available and fall back to the conversation API otherwise
+./bin/swechat "Add a README badge with status"
+```
+
+Chat sessions reuse a cached conversation branch under `.graphlogue/swechat_session.json`, giving a lightweight async workflow without leaving the terminal.
+
 ## 💡 Example Usage
 
 ### Execute a Goal
