@@ -19,7 +19,7 @@ set -euo pipefail
 BASE_URL="${ENGINE_BASE_URL:-http://127.0.0.1:7777}"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$PROJECT_ROOT/logs"
-ENGINE_LOG="$(mktemp -t one_engine_ci_server)"
+ENGINE_LOG="${ENGINE_LOG_PATH:-$(mktemp -t one_engine_ci_server)}"
 REPORT_MD="$LOG_DIR/ci_user_journey_report.md"
 BRANCH_FILE="$PROJECT_ROOT/out_one_engine/branch_id.txt"
 

@@ -1,0 +1,66 @@
+name: meta2_orchestrator_boot
+version: 0.1.0
+description: Bootstrap Meta2 orchestrator services and register the default One Engine branch.
+intent: "Start orchestrator services with synced receipts and an active control branch."
+scope: orchestrator
+system_layer: orchestrator
+source_refs:
+  - Meta3Vault/Meta2 Orchestrator.md:1
+  - Meta3Vault/Receipts.md:1
+preconditions:
+  - type: file_exists
+    path: Meta3Vault/Receipts.md
+  - type: service_ready
+    endpoint: http://127.0.0.1:7777/healthz
+triggers:
+  - type: manual
+    actor: operator
+  - type: timer
+    schedule: cron@hourly
+inputs:
+  - type: ledger
+    path: memory/ledger.jsonl
+  - type: config
+    path: Meta3Vault/Meta2 Orchestrator.md
+actions:
+  - type: utir
+    label: stage_runtime
+    utir_template: utir/meta2_boot.utir
+    expected_receipts:
+      - logs/meta2_boot/{{ run_id }}/stage.log
+  - type: api_call
+    label: register_branch
+    endpoint: /conversation
+    method: POST
+    payload_template: meta/payloads/bootstrap_branch.json
+    expected_receipts:
+      - out_one_engine/branch_id.txt
+postconditions:
+  - type: file_exists
+    path: out_one_engine/branch_id.txt
+  - type: receipt_written
+    path: Meta3Vault/Receipts/boot/{{ run_id }}.md
+  - type: status_bit
+    bit: T
+    value: 1
+failure_modes:
+  - detection: >
+      Missing branch_id.txt after register_branch action.
+    recovery: >
+      Retry the API call with regenerated payload; inspect logs/meta2_boot/{{ run_id }}.
+  - detection: Stage runtime UTIR failure.
+    recovery: Re-run utir/meta2_boot.utir with meta_ablation flag disabled.
+receipts:
+  engine_memory: memory/ledger.jsonl
+  vault_mirror: Meta3Vault/Receipts/boot
+ablation_knob:
+  flag: META_CANON_META2_BOOT_DISABLED
+  expected_effect: disable canonical bootstrap execution.
+upstream_dependencies:
+  - meta3_receipts_rollup
+downstream_consumers:
+  - meta2_ci_loop
+audit_notes:
+  - Ensure GITHUB_TOKEN is scoped to required repos only.
+  - Verify environment variables before invoking UTIR.
+last_review: 2024-10-23T00:00:00Z

@@ -3,6 +3,7 @@ mod branch;
 mod compiler;
 mod conversation;
 mod memory;
+mod meta;
 mod parser;
 mod utir;
 

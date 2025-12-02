@@ -12,7 +12,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PORT="127.0.0.1:7777"
-LOG_FILE="$(mktemp /tmp/one_engine_emergence.XXXXXX)"
+LOG_FILE="${ENGINE_LOG_PATH:-$(mktemp -t one_engine_emergence)}"
 SERVER_PID=""
 
 cleanup() {

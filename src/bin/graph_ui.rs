@@ -85,13 +85,16 @@ struct TemplateSpec {
 }
 
 fn define_prompt_uppercase(_: &TemplateSpec) -> String {
-    "Define a persistent API named 'uppercase' that accepts 'text' and returns it in uppercase.".to_string()
+    "Define a persistent API named 'uppercase' that accepts 'text' and returns it in uppercase."
+        .to_string()
 }
 fn define_prompt_reverse(_: &TemplateSpec) -> String {
-    "Define a persistent API named 'reverse' that accepts 'text' and returns the reversed string.".to_string()
+    "Define a persistent API named 'reverse' that accepts 'text' and returns the reversed string."
+        .to_string()
 }
 fn define_prompt_slugify(_: &TemplateSpec) -> String {
-    "Define a persistent API named 'slugify' that accepts 'text' and returns a URL-safe slug.".to_string()
+    "Define a persistent API named 'slugify' that accepts 'text' and returns a URL-safe slug."
+        .to_string()
 }
 fn define_prompt_counter(_: &TemplateSpec) -> String {
     "Define a persistent API named 'counter' that increments an internal counter and returns it each call.".to_string()
@@ -141,10 +144,7 @@ static TEMPLATE_SPECS: &[TemplateSpec] = &[
     TemplateSpec {
         name: "concat",
         description: "a, b -> concatenated",
-        params: &[
-            TemplateParam { key: "a" },
-            TemplateParam { key: "b" },
-        ],
+        params: &[TemplateParam { key: "a" }, TemplateParam { key: "b" }],
         define_prompt: define_prompt_concat,
     },
 ];
@@ -221,10 +221,20 @@ impl GraphUiApp {
         let mut appr_ct = 0usize;
         let mut call_ct = 0usize;
         for ev in arr.iter().take(k) {
-            if ev.get("ApiGenerated").is_some() { gen_ct += 1; }
-            if ev.get("ApiCalled").is_some() { call_ct += 1; }
-            if let Some(pi) = ev.get("ParsedIntent").and_then(|x| x.get("description")).and_then(|x| x.as_str()) {
-                if pi.contains("ApprovePattern") || pi.contains("approval:") { appr_ct += 1; }
+            if ev.get("ApiGenerated").is_some() {
+                gen_ct += 1;
+            }
+            if ev.get("ApiCalled").is_some() {
+                call_ct += 1;
+            }
+            if let Some(pi) = ev
+                .get("ParsedIntent")
+                .and_then(|x| x.get("description"))
+                .and_then(|x| x.as_str())
+            {
+                if pi.contains("ApprovePattern") || pi.contains("approval:") {
+                    appr_ct += 1;
+                }
             }
         }
         Some((gen_ct, appr_ct, call_ct))
@@ -366,7 +376,9 @@ impl GraphUiApp {
     }
 
     fn apply_force_layout_step(&mut self) {
-        if self.node_positions.is_empty() { return; }
+        if self.node_positions.is_empty() {
+            return;
+        }
         // Basic Fruchterman-Reingold-like iteration
         let area = 800.0 * 800.0;
         let k = (area / (self.node_positions.len() as f32 + 1.0)).sqrt();
@@ -378,7 +390,7 @@ impl GraphUiApp {
         // Repulsive forces
         let keys: Vec<NodeIndex> = self.node_positions.keys().copied().collect();
         for i in 0..keys.len() {
-            for j in (i+1)..keys.len() {
+            for j in (i + 1)..keys.len() {
                 let ni = keys[i];
                 let nj = keys[j];
                 let pi = *self.node_positions.get(&ni).unwrap();
@@ -395,11 +407,14 @@ impl GraphUiApp {
         for e in self.graph.edge_references() {
             let a = e.source();
             let b = e.target();
-            if let (Some(pa), Some(pb)) = (self.node_positions.get(&a), self.node_positions.get(&b)) {
+            if let (Some(pa), Some(pb)) = (self.node_positions.get(&a), self.node_positions.get(&b))
+            {
                 let delta = *pa - *pb;
                 let dist = (delta.x.powi(2) + delta.y.powi(2)).sqrt().max(0.01);
                 let mut force = (dist * dist) / k;
-                if e.weight() == "data" { force *= 1.5; }
+                if e.weight() == "data" {
+                    force *= 1.5;
+                }
                 let dir = egui::vec2(delta.x / dist, delta.y / dist);
                 *disp.get_mut(&a).unwrap() -= dir * force;
                 *disp.get_mut(&b).unwrap() += dir * force;
@@ -411,7 +426,11 @@ impl GraphUiApp {
             *v = (*v + *d) * 0.5; // damp
             let p = self.node_positions.get_mut(&ni).unwrap();
             let len = (v.x.powi(2) + v.y.powi(2)).sqrt();
-            let step = if len > temperature { egui::vec2(v.x / len * temperature, v.y / len * temperature) } else { *v };
+            let step = if len > temperature {
+                egui::vec2(v.x / len * temperature, v.y / len * temperature)
+            } else {
+                *v
+            };
             *p += step;
         }
     }
@@ -439,8 +458,14 @@ impl GraphUiApp {
         for w in calls.windows(2) {
             if let [a, b] = &w {
                 if a != b {
-                    if let (Some(&ia), Some(&ib)) = (self.by_name_index.get(a), self.by_name_index.get(b)) {
-                        let (x, y) = if ia.index() <= ib.index() { (ia, ib) } else { (ib, ia) };
+                    if let (Some(&ia), Some(&ib)) =
+                        (self.by_name_index.get(a), self.by_name_index.get(b))
+                    {
+                        let (x, y) = if ia.index() <= ib.index() {
+                            (ia, ib)
+                        } else {
+                            (ib, ia)
+                        };
                         if seen.insert((x, y, "seq")) {
                             self.graph.add_edge(x, y, String::from("seq"));
                         }
@@ -453,9 +478,18 @@ impl GraphUiApp {
             let k = self.timeline_cutoff.min(arr.len());
             for ev in arr.iter().take(k) {
                 if let Some(df) = ev.get("DataFlow") {
-                    if let (Some(from), Some(to)) = (df.get("from").and_then(|s| s.as_str()), df.get("to").and_then(|s| s.as_str())) {
-                        if let (Some(&ia), Some(&ib)) = (self.by_name_index.get(from), self.by_name_index.get(to)) {
-                            let (x, y) = if ia.index() <= ib.index() { (ia, ib) } else { (ib, ia) };
+                    if let (Some(from), Some(to)) = (
+                        df.get("from").and_then(|s| s.as_str()),
+                        df.get("to").and_then(|s| s.as_str()),
+                    ) {
+                        if let (Some(&ia), Some(&ib)) =
+                            (self.by_name_index.get(from), self.by_name_index.get(to))
+                        {
+                            let (x, y) = if ia.index() <= ib.index() {
+                                (ia, ib)
+                            } else {
+                                (ib, ia)
+                            };
                             if seen.insert((x, y, "data")) {
                                 self.graph.add_edge(x, y, String::from("data"));
                             }
@@ -514,10 +548,13 @@ impl GraphUiApp {
 
 fn slugify(input: &str) -> String {
     let mut s = input.to_lowercase();
-    s = s.chars()
+    s = s
+        .chars()
         .map(|c| if c.is_alphanumeric() { c } else { '-' })
         .collect();
-    while s.contains("--") { s = s.replace("--", "-"); }
+    while s.contains("--") {
+        s = s.replace("--", "-");
+    }
     s.trim_matches('-').to_string()
 }
 
@@ -560,12 +597,20 @@ impl App for GraphUiApp {
             ui.horizontal(|ui| {
                 ui.label("Events:");
                 if self.timeline_total == 0 {
-                    ui.add_enabled(false, egui::Slider::new(&mut self.timeline_cutoff, 0..=0).text("0 / 0"));
+                    ui.add_enabled(
+                        false,
+                        egui::Slider::new(&mut self.timeline_cutoff, 0..=0).text("0 / 0"),
+                    );
                 } else {
                     // ensure cutoff within bounds
-                    if self.timeline_cutoff > self.timeline_total { self.timeline_cutoff = self.timeline_total; }
+                    if self.timeline_cutoff > self.timeline_total {
+                        self.timeline_cutoff = self.timeline_total;
+                    }
                     let label = format!("{} / {}", self.timeline_cutoff, self.timeline_total);
-                    ui.add(egui::Slider::new(&mut self.timeline_cutoff, 0..=self.timeline_total).text(label));
+                    ui.add(
+                        egui::Slider::new(&mut self.timeline_cutoff, 0..=self.timeline_total)
+                            .text(label),
+                    );
                     if ui.button("Reset").clicked() {
                         self.timeline_cutoff = self.timeline_total;
                     }
@@ -574,28 +619,36 @@ impl App for GraphUiApp {
             });
             // Feedback summary
             if let Some((gen_ct, appr_ct, call_ct)) = self.feedback_counts() {
-                ui.label(format!("Feedback: generated={} approvals={} calls={}", gen_ct, appr_ct, call_ct));
+                ui.label(format!(
+                    "Feedback: generated={} approvals={} calls={}",
+                    gen_ct, appr_ct, call_ct
+                ));
             }
         });
 
-        egui::SidePanel::left("left").resizable(true).show(ctx, |ui| {
-            ui.heading("Endpoints");
-            let indices = self.filtered_indices();
-            for (ni, _score) in indices.iter().take(100) {
-                if let Some(name) = self.graph.node_weight(*ni) {
-                    let clicked = ui.selectable_label(self.selected == Some(*ni), name).clicked();
-                    if clicked {
-                        self.selected = Some(*ni);
+        egui::SidePanel::left("left")
+            .resizable(true)
+            .show(ctx, |ui| {
+                ui.heading("Endpoints");
+                let indices = self.filtered_indices();
+                for (ni, _score) in indices.iter().take(100) {
+                    if let Some(name) = self.graph.node_weight(*ni) {
+                        let clicked = ui
+                            .selectable_label(self.selected == Some(*ni), name)
+                            .clicked();
+                        if clicked {
+                            self.selected = Some(*ni);
+                        }
                     }
                 }
-            }
-        });
+            });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.label("Graph view");
             ui.separator();
             // Draw graph in a large interactable area
-            let (response, painter) = ui.allocate_painter(ui.available_size(), egui::Sense::click_and_drag());
+            let (response, painter) =
+                ui.allocate_painter(ui.available_size(), egui::Sense::click_and_drag());
             let to_screen = egui::emath::RectTransform::from_to(
                 egui::Rect::from_center_size(egui::pos2(0.0, 0.0), egui::vec2(700.0, 700.0)),
                 response.rect,
@@ -610,12 +663,24 @@ impl App for GraphUiApp {
             // Draw edges (sequence co-occurrence = gray, data-flow = orange)
             for edge in self.graph.edge_references() {
                 let (a, b) = (edge.source(), edge.target());
-                if let (Some(pa), Some(pb)) = (self.node_positions.get(&a), self.node_positions.get(&b)) {
+                if let (Some(pa), Some(pb)) =
+                    (self.node_positions.get(&a), self.node_positions.get(&b))
+                {
                     let sa = to_screen.transform_pos(*pa);
                     let sb = to_screen.transform_pos(*pb);
                     let w = edge.weight();
-                    let col = if w == "data" { egui::Color32::from_rgb(255, 140, 0) } else { egui::Color32::from_gray(160) };
-                    painter.line_segment([sa, sb], egui::Stroke { width: 2.0, color: col });
+                    let col = if w == "data" {
+                        egui::Color32::from_rgb(255, 140, 0)
+                    } else {
+                        egui::Color32::from_gray(160)
+                    };
+                    painter.line_segment(
+                        [sa, sb],
+                        egui::Stroke {
+                            width: 2.0,
+                            color: col,
+                        },
+                    );
                 }
             }
 
@@ -629,21 +694,35 @@ impl App for GraphUiApp {
                 if let Some(pos) = self.node_positions.get(&ni) {
                     let screen_pos = to_screen.transform_pos(*pos);
                     let active = filtered.is_empty() || filtered.contains(&ni);
-                    let mut color = if active { egui::Color32::from_rgb(0, 128, 255) } else { egui::Color32::from_gray(120) };
+                    let mut color = if active {
+                        egui::Color32::from_rgb(0, 128, 255)
+                    } else {
+                        egui::Color32::from_gray(120)
+                    };
                     // Node kind coloring
                     if let Some(kind) = self.node_kinds.get(&ni) {
                         match kind {
                             NodeKind::Endpoint => {
                                 if let Some(doc) = &self.autodoc {
                                     if let Some(name) = self.graph.node_weight(ni) {
-                                        if let Some(ep) = doc.endpoints.iter().find(|e| e.name == *name) {
-                                            if ep.persisted { color = egui::Color32::from_rgb(0, 170, 90); } else { color = egui::Color32::from_rgb(0, 128, 255); }
+                                        if let Some(ep) =
+                                            doc.endpoints.iter().find(|e| e.name == *name)
+                                        {
+                                            if ep.persisted {
+                                                color = egui::Color32::from_rgb(0, 170, 90);
+                                            } else {
+                                                color = egui::Color32::from_rgb(0, 128, 255);
+                                            }
                                         }
                                     }
                                 }
                             }
-                            NodeKind::Pattern => { color = egui::Color32::from_rgb(34, 197, 94); } // emerald
-                            NodeKind::Feature => { color = egui::Color32::from_rgb(56, 189, 248); } // sky
+                            NodeKind::Pattern => {
+                                color = egui::Color32::from_rgb(34, 197, 94);
+                            } // emerald
+                            NodeKind::Feature => {
+                                color = egui::Color32::from_rgb(56, 189, 248);
+                            } // sky
                         }
                     }
                     painter.circle_filled(screen_pos, 11.0, color);
@@ -694,18 +773,27 @@ impl App for GraphUiApp {
                             }
                         }
                     }
-                    if let Some((ni, _)) = best { self.selected = Some(ni); }
+                    if let Some((ni, _)) = best {
+                        self.selected = Some(ni);
+                    }
                 }
             }
             // Drag to move selected node
             if response.dragged() {
-                if let (Some(sel), Some(pointer)) = (self.selected, response.interact_pointer_pos()) {
+                if let (Some(sel), Some(pointer)) = (self.selected, response.interact_pointer_pos())
+                {
                     if let Some(p) = self.node_positions.get_mut(&sel) {
                         // invert transform approximately by linear mapping center
                         // We already draw from logical to screen; approximate inverse by mapping screen delta back
                         // Use small delta movements
                         // For simplicity, set position to inverse map using to_screen inverse
-                        let inv = egui::emath::RectTransform::from_to(response.rect, egui::Rect::from_center_size(egui::pos2(0.0, 0.0), egui::vec2(700.0, 700.0)));
+                        let inv = egui::emath::RectTransform::from_to(
+                            response.rect,
+                            egui::Rect::from_center_size(
+                                egui::pos2(0.0, 0.0),
+                                egui::vec2(700.0, 700.0),
+                            ),
+                        );
                         *p = inv.transform_pos(pointer);
                     }
                 }
@@ -984,12 +1072,18 @@ impl App for GraphUiApp {
 
 fn load_branch_id_from_file() -> Option<String> {
     let path = std::path::Path::new("out_one_engine/branch_id.txt");
-    std::fs::read_to_string(path).ok().map(|s| s.trim().to_string())
+    std::fs::read_to_string(path)
+        .ok()
+        .map(|s| s.trim().to_string())
 }
 
 fn main() -> eframe::Result<()> {
-    let base_url = std::env::var("ENGINE_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:7777".to_string());
-    let branch_id = std::env::var("ENGINE_BRANCH_ID").ok().or_else(load_branch_id_from_file).unwrap_or_default();
+    let base_url =
+        std::env::var("ENGINE_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:7777".to_string());
+    let branch_id = std::env::var("ENGINE_BRANCH_ID")
+        .ok()
+        .or_else(load_branch_id_from_file)
+        .unwrap_or_default();
 
     let options = eframe::NativeOptions::default();
     eframe::run_native(

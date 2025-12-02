@@ -61,7 +61,14 @@ impl Default for SecurityRules {
 
 impl UtirCompiler {
     pub fn new(allowed_domains: Vec<String>) -> Result<Self> {
-        let sandbox_root = TempDir::new()?;
+        // Host mode: allow using host filesystem directly (less isolation, for operator use).
+        let host_mode = std::env::var("ENGINE_HOST_MODE").ok().as_deref() == Some("1");
+        let sandbox_root = if host_mode {
+            // Use '/' as root placeholder; no temp dir constraint.
+            TempDir::new_in("/")?
+        } else {
+            TempDir::new()?
+        };
         Ok(Self {
             sandbox_root,
             allowed_domains,
@@ -244,8 +251,14 @@ impl UtirCompiler {
         }
 
         let timeout_duration = self.parse_duration(timeout_str)?;
+        let host_mode = std::env::var("ENGINE_HOST_MODE").ok().as_deref() == Some("1");
         let work_dir = if let Some(dir) = working_dir {
-            PathBuf::from(&context.sandbox_root).join(dir)
+            let p = PathBuf::from(dir);
+            if host_mode && p.is_absolute() {
+                p
+            } else {
+                PathBuf::from(&context.sandbox_root).join(dir)
+            }
         } else {
             PathBuf::from(&context.sandbox_root)
         };
@@ -282,10 +295,16 @@ impl UtirCompiler {
         max_size: &str,
         context: &ExecutionContext,
     ) -> Result<(bool, String)> {
-        let full_path = PathBuf::from(&context.sandbox_root).join(path);
+        let host_mode = std::env::var("ENGINE_HOST_MODE").ok().as_deref() == Some("1");
+        let candidate = PathBuf::from(path);
+        let full_path = if host_mode && candidate.is_absolute() {
+            candidate
+        } else {
+            PathBuf::from(&context.sandbox_root).join(path)
+        };
 
-        // Security check - ensure path is within sandbox
-        if !full_path.starts_with(&context.sandbox_root) {
+        // Security check - ensure path is within sandbox (unless host_mode)
+        if !host_mode && !full_path.starts_with(&context.sandbox_root) {
             return Ok((false, "Path outside sandbox".to_string()));
         }
 
@@ -309,10 +328,16 @@ impl UtirCompiler {
         create_dirs: bool,
         context: &ExecutionContext,
     ) -> Result<(bool, String)> {
-        let full_path = PathBuf::from(&context.sandbox_root).join(path);
+        let host_mode = std::env::var("ENGINE_HOST_MODE").ok().as_deref() == Some("1");
+        let candidate = PathBuf::from(path);
+        let full_path = if host_mode && candidate.is_absolute() {
+            candidate
+        } else {
+            PathBuf::from(&context.sandbox_root).join(path)
+        };
 
-        // Security check - ensure path is within sandbox
-        if !full_path.starts_with(&context.sandbox_root) {
+        // Security check - ensure path is within sandbox (unless host_mode)
+        if !host_mode && !full_path.starts_with(&context.sandbox_root) {
             return Ok((false, "Path outside sandbox".to_string()));
         }
 

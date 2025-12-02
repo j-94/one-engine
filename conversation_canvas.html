@@ -93,34 +93,82 @@
     </div>
   </div>
   <script>
+    const prompts = document.querySelector('#prompts .content');
+    const responses = document.querySelector('#responses .content');
+    const receipts = document.querySelector('#receipts .content');
+
+    function appendBlock(target, title, body) {
+      const h = document.createElement('h3');
+      h.textContent = title;
+      const pre = document.createElement('pre');
+      pre.textContent = body;
+      target.appendChild(h);
+      target.appendChild(pre);
+      target.scrollTop = target.scrollHeight;
+    }
+
     async function loadConversation() {
-      const response = await fetch('conversation.md');
-      const text = await response.text();
-      const sections = text.split(/(^###\s.*$)/m).slice(1);
-      const prompts = document.querySelector('#prompts .content');
-      const responses = document.querySelector('#responses .content');
-      const receipts = document.querySelector('#receipts .content');
-
-      prompts.innerHTML = '';
-      responses.innerHTML = '';
-      receipts.innerHTML = '';
-
-      for (let i = 0; i < sections.length; i += 2) {
-        const title = sections[i];
-        const body = sections[i + 1];
-        if (!body) continue;
-
-        const prompt = body.match(/#### Prompt\n```([\s\S]*?)```/);
-        const response = body.match(/#### Engine Response\n```([\s\S]*?)```/);
-        const receipt = body.match(/#### Receipts\n```([\s\S]*?)```/);
-
-        prompts.innerHTML += `<h3>${title.trim()}</h3><pre>${prompt ? prompt[1].trim() : ''}</pre>`;
-        responses.innerHTML += `<h3>${title.trim()}</h3><pre>${response ? response[1].trim() : ''}</pre>`;
-        receipts.innerHTML += `<h3>${title.trim()}</h3><pre>${receipt ? receipt[1].trim() : ''}</pre>`;
+      try {
+        const response = await fetch('conversation.md');
+        if (!response.ok) return;
+        const text = await response.text();
+        const sections = text.split(/(^###\s.*$)/m).slice(1);
+        prompts.innerHTML = '';
+        responses.innerHTML = '';
+        receipts.innerHTML = '';
+        for (let i = 0; i < sections.length; i += 2) {
+          const title = sections[i];
+          const body = sections[i + 1];
+          if (!body) continue;
+          const prompt = body.match(/#### Prompt\n```([\s\S]*?)```/);
+          const response = body.match(/#### Engine Response\n```([\s\S]*?)```/);
+          const receipt = body.match(/#### Receipts\n```([\s\S]*?)```/);
+          appendBlock(prompts, title.trim(), prompt ? prompt[1].trim() : '');
+          appendBlock(responses, title.trim(), response ? response[1].trim() : '');
+          appendBlock(receipts, title.trim(), receipt ? receipt[1].trim() : '');
+        }
+      } catch (err) {
+        console.error('loadConversation failed', err);
       }
     }
 
-    loadConversation();
+    function connectSSE() {
+      const params = new URLSearchParams(window.location.search);
+      const engineUrl = (params.get('engine') || 'http://127.0.0.1:8080').replace(/\/$/, '');
+      const runId = params.get('run_id') || params.get('runId') || '';
+      const url = engineUrl + '/progress.sse' + (runId ? '?run_id=' + encodeURIComponent(runId) : '');
+      appendBlock(responses, 'SSE', `Connecting to ${url}`);
+      let es;
+      try {
+        es = new EventSource(url);
+      } catch (err) {
+        appendBlock(responses, 'SSE', 'EventSource failed to start: ' + err.message);
+        return;
+      }
+      es.onmessage = (evt) => {
+        try {
+          const data = JSON.parse(evt.data);
+          const ts = new Date().toISOString();
+          const phase = data.phase || data.status || 'event';
+          appendBlock(responses, `${ts} • ${phase}`, JSON.stringify(data, null, 2));
+          if (data.receipt || data.receipt_path || data.output_path) {
+            const r = data.receipt || data.receipt_path || data.output_path;
+            appendBlock(receipts, `${ts} • receipt`, r);
+          }
+          if (data.request || data.prompt) {
+            appendBlock(prompts, `${ts} • prompt`, JSON.stringify(data.request || data.prompt, null, 2));
+          }
+        } catch (err) {
+          appendBlock(responses, 'SSE parse error', evt.data);
+        }
+      };
+      es.onerror = () => {
+        appendBlock(responses, 'SSE', 'Error/closed — check engine availability.');
+      };
+    }
+
+    // Load existing transcript, then stream live.
+    loadConversation().then(connectSSE);
   </script>
 </body>
 </html>

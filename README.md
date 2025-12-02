@@ -42,6 +42,7 @@ sudo ./deploy.sh
 - **Version Info**: `GET /version` - System status and crystallized patterns
 - **Execute Goal**: `POST /execute_goal` - High-level natural language execution
 - **Compile UTIR**: `POST /compile_and_run` - Direct UTIR compilation and execution
+- **Telemetry Suite**: `POST /telemetry/run` - Run Codex + deterministic RLM suites and refresh receipts
 
 ### Generative Chat Interface  
 - **Start Conversation**: `POST /conversation` - Spawn a dedicated branch for API evolution
@@ -58,6 +59,10 @@ sudo ./deploy.sh
 - Or launch everything in one command (starts engine, web server, opens browser):
   ```bash
   ./scripts/open_canvas.sh
+  ```
+- Telemetry suites (Codex + deterministic RLM):
+  ```bash
+  ./scripts/telemetry_run.sh --dataset recursive_patterns.json --label nightly
   ```
   This spins up tmux sessions (`one_engine`, `one_engine_canvas_server`) if needed. Attach to them for live logs.
 

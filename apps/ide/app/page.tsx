@@ -1,3 +1,5 @@
+'use client';
+
 import './globals.css';
 import React, { useEffect, useMemo, useState } from 'react';
 import { AutodocPanel } from '../components/AutodocPanel';
@@ -20,6 +22,19 @@ export default function Page() {
   const [branchId, setBranchId] = useBranchId();
   const [last, setLast] = useState<any | null>(null);
   const [auto, setAuto] = useState<any | null>(null);
+
+  // On first load, if no explicit branch is set, try to fetch default from server (out_one_engine/branch_id.txt)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const current = localStorage.getItem('branch_id');
+    if (!current || current === 'dev') {
+      fetch('/api/default-branch').then(async (r) => {
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j?.branchId) setBranchId(j.branchId);
+      }).catch(() => {});
+    }
+  }, [setBranchId]);
 
   useEffect(() => {
     let cancelled = false;

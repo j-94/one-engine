@@ -12,12 +12,22 @@ use std::io;
 use std::time::{Duration, Instant};
 
 #[derive(Debug, Deserialize, Clone)]
-struct AutoDoc { endpoints: Vec<EndpointDoc> }
+struct AutoDoc {
+    endpoints: Vec<EndpointDoc>,
+}
 #[derive(Debug, Deserialize, Clone)]
-struct EndpointDoc { name: String, description: String, parameters: Vec<String>, persisted: bool, examples: Vec<String> }
+struct EndpointDoc {
+    name: String,
+    description: String,
+    parameters: Vec<String>,
+    persisted: bool,
+    examples: Vec<String>,
+}
 
 #[derive(Debug, Deserialize, Clone)]
-struct StartConversationResponse { branch_id: String }
+struct StartConversationResponse {
+    branch_id: String,
+}
 
 struct App {
     base_url: String,
@@ -47,7 +57,12 @@ impl App {
     fn ensure_branch(&mut self) {
         if self.branch_id.trim().is_empty() {
             let url = format!("{}/conversation", self.base_url);
-            if let Ok(resp) = self.client.post(&url).json(&serde_json::json!({"label": "tui"})).send() {
+            if let Ok(resp) = self
+                .client
+                .post(&url)
+                .json(&serde_json::json!({"label": "tui"}))
+                .send()
+            {
                 if let Ok(data) = resp.json::<StartConversationResponse>() {
                     self.branch_id = data.branch_id;
                     self.status = format!("New branch: {}", self.branch_id);
@@ -59,14 +74,20 @@ impl App {
     fn send_prompt(&mut self, prompt: &str) {
         self.ensure_branch();
         let url = format!("{}/conversation/{}/prompt", self.base_url, self.branch_id);
-        match self.client.post(&url)
+        match self
+            .client
+            .post(&url)
             .header("Content-Type", "application/json")
             .body(serde_json::to_string(&serde_json::json!({"prompt": prompt})).unwrap())
-            .send() {
+            .send()
+        {
             Ok(resp) => {
                 self.messages.push(format!("> {}", prompt));
                 if let Ok(v) = resp.json::<serde_json::Value>() {
-                    let effect = v.get("effect").cloned().unwrap_or(serde_json::json!({"Unknown":{}}));
+                    let effect = v
+                        .get("effect")
+                        .cloned()
+                        .unwrap_or(serde_json::json!({"Unknown":{}}));
                     self.messages.push(format!("{:?}", effect));
                 } else {
                     self.messages.push("(non-JSON response)".to_string());
@@ -92,10 +113,14 @@ impl App {
 }
 
 fn main() -> io::Result<()> {
-    let base_url = std::env::var("ENGINE_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:7777".to_string());
-    let branch_id = std::env::var("ENGINE_BRANCH_ID").unwrap_or_else(|_| {
-        std::fs::read_to_string("out_one_engine/branch_id.txt").unwrap_or_default()
-    }).trim().to_string();
+    let base_url =
+        std::env::var("ENGINE_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:7777".to_string());
+    let branch_id = std::env::var("ENGINE_BRANCH_ID")
+        .unwrap_or_else(|_| {
+            std::fs::read_to_string("out_one_engine/branch_id.txt").unwrap_or_default()
+        })
+        .trim()
+        .to_string();
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -163,7 +188,11 @@ fn main() -> io::Result<()> {
                     match (key.modifiers, key.code) {
                         (KeyModifiers::CONTROL, KeyCode::Char('c')) | (_, KeyCode::Esc) => break,
                         (KeyModifiers::CONTROL, KeyCode::Char('r')) => app.refresh_autodoc(),
-                        (KeyModifiers::CONTROL, KeyCode::Char('n')) => { app.branch_id.clear(); app.ensure_branch(); app.refresh_autodoc(); },
+                        (KeyModifiers::CONTROL, KeyCode::Char('n')) => {
+                            app.branch_id.clear();
+                            app.ensure_branch();
+                            app.refresh_autodoc();
+                        }
                         (KeyModifiers::CONTROL, KeyCode::Char('g')) => {
                             let _ = std::process::Command::new("sh")
                                 .arg("-c")
@@ -173,9 +202,13 @@ fn main() -> io::Result<()> {
                         }
                         (_, KeyCode::Enter) => {
                             let prompt = std::mem::take(&mut app.input);
-                            if !prompt.trim().is_empty() { app.send_prompt(&prompt); }
+                            if !prompt.trim().is_empty() {
+                                app.send_prompt(&prompt);
+                            }
                         }
-                        (_, KeyCode::Backspace) => { app.input.pop(); }
+                        (_, KeyCode::Backspace) => {
+                            app.input.pop();
+                        }
                         (_, KeyCode::Char(c)) => app.input.push(c),
                         _ => {}
                     }

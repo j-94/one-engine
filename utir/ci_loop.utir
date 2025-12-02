@@ -1,0 +1,9 @@
+task_id: "meta2_ci_loop"
+description: "Fire the Meta2 CI governance workflow."
+operations:
+  - type: "shell"
+    command: "./scripts/governance_check.sh --summary"
+    timeout: "900s"
+  - type: "assert.shell_success"
+    command: "./scripts/governance_check.sh --summary"
+    timeout: "900s"

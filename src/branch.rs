@@ -109,7 +109,8 @@ impl BranchManager {
     }
 
     pub async fn record_data_flow(&self, branch_id: Uuid, from: String, to: String) {
-        self.record_event(branch_id, BranchEvent::DataFlow { from, to }).await;
+        self.record_event(branch_id, BranchEvent::DataFlow { from, to })
+            .await;
     }
 
     /// Generate autodoc for a branch by inspecting generated APIs and prompts that call them
@@ -227,7 +228,11 @@ impl GeneratedApi {
                 }
             }
             ApiLogic::Uppercase => {
-                let key = self.parameters.first().map(|p| p.name.as_str()).unwrap_or("text");
+                let key = self
+                    .parameters
+                    .first()
+                    .map(|p| p.name.as_str())
+                    .unwrap_or("text");
                 let input = args.get(key).cloned().unwrap_or_default();
                 Ok(input.to_uppercase())
             }
@@ -237,12 +242,24 @@ impl GeneratedApi {
                 Ok(format!("{}{}", a, b))
             }
             ApiLogic::Slugify => {
-                let key = self.parameters.first().map(|p| p.name.as_str()).unwrap_or("text");
+                let key = self
+                    .parameters
+                    .first()
+                    .map(|p| p.name.as_str())
+                    .unwrap_or("text");
                 let input = args.get(key).cloned().unwrap_or_default();
                 let slug = input
                     .to_lowercase()
                     .chars()
-                    .map(|c| if c.is_ascii_alphanumeric() { c } else if c.is_whitespace() || c == '-' { '-' } else { '-' })
+                    .map(|c| {
+                        if c.is_ascii_alphanumeric() {
+                            c
+                        } else if c.is_whitespace() || c == '-' {
+                            '-'
+                        } else {
+                            '-'
+                        }
+                    })
                     .collect::<String>()
                     .trim_matches('-')
                     .to_string();
@@ -251,7 +268,9 @@ impl GeneratedApi {
                 let mut prev_dash = false;
                 for ch in slug.chars() {
                     if ch == '-' {
-                        if !prev_dash { collapsed.push('-'); }
+                        if !prev_dash {
+                            collapsed.push('-');
+                        }
                         prev_dash = true;
                     } else {
                         collapsed.push(ch);
@@ -261,8 +280,14 @@ impl GeneratedApi {
                 Ok(collapsed)
             }
             ApiLogic::Sum => {
-                let a = args.get("a").and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
-                let b = args.get("b").and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
+                let a = args
+                    .get("a")
+                    .and_then(|s| s.parse::<i64>().ok())
+                    .unwrap_or(0);
+                let b = args
+                    .get("b")
+                    .and_then(|s| s.parse::<i64>().ok())
+                    .unwrap_or(0);
                 Ok((a + b).to_string())
             }
             ApiLogic::Static { value } => Ok(value.clone()),

@@ -6,7 +6,7 @@ ENGINE_URL="${ENGINE_URL:-http://127.0.0.1:7777}"
 CANVAS_PORT="${CANVAS_PORT:-8000}"
 ENGINE_SESSION="one_engine"
 SERVER_SESSION="one_engine_canvas_server"
-LOG_FILE="/tmp/one_engine_canvas.log"
+LOG_FILE="${ENGINE_LOG_PATH:-/tmp/one_engine_canvas.log}"
 
 cd "$PROJECT_ROOT"
 
@@ -19,8 +19,9 @@ ensure_engine_running() {
   if tmux has-session -t "$ENGINE_SESSION" 2>/dev/null; then
     return
   fi
-  echo "[meta2] starting engine in tmux session '$ENGINE_SESSION'"
-  tmux new-session -d -s "$ENGINE_SESSION" "cd '$PROJECT_ROOT' && cargo run > '$LOG_FILE' 2>&1"
+  ENGINE_BIN="${ENGINE_BIN:-one-engine}"
+  echo "[meta2] starting engine bin '$ENGINE_BIN' in tmux session '$ENGINE_SESSION'"
+  tmux new-session -d -s "$ENGINE_SESSION" "cd '$PROJECT_ROOT' && cargo run --bin '$ENGINE_BIN' > '$LOG_FILE' 2>&1"
 }
 
 wait_for_health() {
@@ -123,7 +124,24 @@ wait_for_health
 ensure_server_running
 ensure_conversation_files
 
-CANVAS_URL="http://127.0.0.1:${CANVAS_PORT}/conversation_canvas.html"
+QS_RUN=""
+if [ -n "${RUN_ID:-}" ]; then
+  QS_RUN="run_id=${RUN_ID}"
+fi
+ENC_ENGINE=$(python - <<'PY'
+import os, urllib.parse
+print(urllib.parse.quote(os.environ.get("ENGINE_URL",""), safe=""))
+PY
+)
+QS_ENGINE="engine=${ENC_ENGINE}"
+JOINER="?"
+if [ -n "$QS_RUN" ]; then
+  JOINER="?"
+  QS="${QS_RUN}&${QS_ENGINE}"
+else
+  QS="${QS_ENGINE}"
+fi
+CANVAS_URL="http://127.0.0.1:${CANVAS_PORT}/conversation_canvas.html?${QS}"
 
 if command -v open >/dev/null 2>&1; then
   echo "[meta2] opening $CANVAS_URL"

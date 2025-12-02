@@ -1,0 +1,58 @@
+name: meta3_receipts_rollup
+version: 0.1.0
+description: Aggregate One Engine receipts and export summaries back into Meta3Vault indices and graphs.
+intent: "Keep engine receipts and Meta3Vault knowledge synchronized for downstream analytics."
+scope: knowledge
+system_layer: knowledge
+source_refs:
+  - Meta3Vault/Receipts Graph Export.md:1
+  - Meta3Vault/Receipts Bucket/README.md:1
+preconditions:
+  - type: directory_exists
+    path: Meta3Vault/Receipts Bucket
+  - type: directory_exists
+    path: logs/
+triggers:
+  - type: timer
+    schedule: cron@6h
+  - type: manual
+    actor: operator
+actions:
+  - type: shell
+    label: sync_receipts
+    command: "python scripts/sync_receipts.py --dest Meta3Vault/Receipts Bucket --index Meta3Vault/Receipts Index.md"
+    working_dir: .
+    expected_receipts:
+      - logs/receipts_rollup/{{ run_id }}/sync.log
+  - type: shell
+    label: export_graph
+    command: "python scripts/export_receipts_graph.py --source Meta3Vault/Receipts Bucket --out Meta3Vault/Receipts Graph Export.md"
+    working_dir: .
+    expected_receipts:
+      - Meta3Vault/Receipts Graph Export.md
+postconditions:
+  - type: report_exists
+    path: Meta3Vault/Receipts Graph Export.md
+  - type: receipt_written
+    path: Meta3Vault/Receipts/{{ run_id }}-rollup.md
+  - type: status_bit
+    bit: Δ
+    value: 0
+failure_modes:
+  - detection: missing export file
+    recovery: rerun export_graph step with verbose flag.
+  - detection: sync script import error
+    recovery: install required python dependencies listed in scripts/requirements.txt.
+receipts:
+  engine_memory: memory/ledger.jsonl
+  vault_mirror: Meta3Vault/Receipts
+ablation_knob:
+  flag: META_CANON_RECEIPTS_ROLLUP_DISABLED
+  expected_effect: skip rollup but preserve manual execution.
+upstream_dependencies:
+  - meta2_ci_loop
+downstream_consumers:
+  - meta2_orchestrator_boot
+audit_notes:
+  - Scripts interact with Meta3Vault: ensure safe path handling on macOS.
+last_review: 2024-10-23T00:00:00Z

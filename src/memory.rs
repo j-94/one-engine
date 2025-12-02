@@ -658,7 +658,9 @@ mod tests {
             .await
             .expect("patterns.json should exist");
         let persisted_db: PatternDatabase = serde_json::from_str(&persisted).unwrap();
-        assert!(persisted_db.crystallized_patterns.contains_key(&pattern_name));
+        assert!(persisted_db
+            .crystallized_patterns
+            .contains_key(&pattern_name));
 
         let alignment_trigger = "misalignment_step_1".to_string();
         let uncertainty_pattern = "uncertainty_step_1".to_string();

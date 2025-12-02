@@ -270,7 +270,8 @@ if lsof -ti ":${IDE_PORT}" >/dev/null 2>&1; then
   echo "[meta2] IDE already served on :${IDE_PORT}"
 else
   echo "[meta2] serving IDE on :${IDE_PORT}"
-  ( cd "$IDE_DIR" && nohup python3 -m http.server ${IDE_PORT} > /tmp/one_engine_ide_http.log 2>&1 & )
+  IDE_HTTP_LOG="${ENGINE_IDE_HTTP_LOG_PATH:-/tmp/one_engine_ide_http.log}"
+  ( cd "$IDE_DIR" && nohup python3 -m http.server ${IDE_PORT} > "$IDE_HTTP_LOG" 2>&1 & )
 fi
 
 URL="http://127.0.0.1:${IDE_PORT}/index.html"

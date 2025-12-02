@@ -1,0 +1,11 @@
+{
+  "label": "meta2-bootstrap",
+  "prompt": "Initialize Meta2 orchestrator control branch.",
+  "context": {
+    "source": "meta2_orchestrator_boot",
+    "notes": [
+      "Seed branch for orchestrator control",
+      "Ensure receipts mirror to Meta3Vault"
+    ]
+  }
+}

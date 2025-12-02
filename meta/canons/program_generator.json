@@ -1,0 +1,41 @@
+{
+  "name": "program_generator",
+  "description": "Multistep program generation via viable system model",
+  "steps": [
+    {
+      "id": "analyze",
+      "action": "pattern_analysis",
+      "inputs": ["spec", "context"],
+      "outputs": ["requirements"]
+    },
+    {
+      "id": "design", 
+      "action": "architecture_design",
+      "inputs": ["requirements"],
+      "outputs": ["architecture"]
+    },
+    {
+      "id": "generate",
+      "action": "code_generation", 
+      "inputs": ["architecture"],
+      "outputs": ["program"]
+    },
+    {
+      "id": "validate",
+      "action": "validation_check",
+      "inputs": ["program"],
+      "outputs": ["validated_program"]
+    },
+    {
+      "id": "crystallize",
+      "action": "pattern_crystallization",
+      "inputs": ["validated_program"],
+      "outputs": ["atomic_artifact"]
+    }
+  ],
+  "governance": {
+    "viable_system_model": true,
+    "consciousness_bits": ["A", "U", "P", "E"],
+    "crystallization_threshold": 0.8
+  }
+}

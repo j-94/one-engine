@@ -1,0 +1,12 @@
+task_id: "meta2_bootstrap"
+description: "Stage Meta2 orchestrator runtime prerequisites."
+operations:
+  - type: "shell"
+    command: "echo '[meta2_boot] staging runtime prerequisites'"
+    timeout: "30s"
+  - type: "shell"
+    command: "./scripts/governance_check.sh --dry-run"
+    timeout: "600s"
+  - type: "assert.shell_success"
+    command: "./scripts/governance_check.sh --dry-run"
+    timeout: "600s"

@@ -20,7 +20,7 @@ echo "Press Ctrl+C to stop the consciousness"
 echo ""
 
 # Run the development server
-cargo run -- \
+cargo run --bin one-engine -- \
   --port 7777 \
   --host 0.0.0.0 \
   --memory-path ./memory \

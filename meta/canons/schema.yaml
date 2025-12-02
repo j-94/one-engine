@@ -1,0 +1,97 @@
+version: 0.1.0
+description: >
+  Meta Canon schema describing how doctrinal capabilities from Meta3Vault map
+  into executable primitives for One Engine. Each canon is a declarative
+  contract that the runtime can inspect, schedule, and execute.
+
+fields:
+  name:
+    type: string
+    required: true
+    description: Canon slug used for lookups and routing.
+  version:
+    type: string
+    required: true
+    description: >
+      Semver identifier so downstream consumers can reason about upgrades and
+      compatibility.
+  description:
+    type: string
+    required: false
+    description: Human friendly summary of the canon.
+  source_refs:
+    type: list[string]
+    required: true
+    description: >
+      Markdown references back into Meta3Vault documents (path:line) that
+      establish provenance for the canon.
+  intent:
+    type: string
+    required: true
+    description: >
+      Short statement of the operational goal this canon fulfils.
+  scope:
+    type: string
+    required: false
+    description: Higher level grouping (optional) for organising canons.
+  system_layer:
+    type: string
+    required: true
+    description: >
+      Which subsystem this canon governs (e.g. orchestrator, governance,
+      knowledge).
+  preconditions:
+    type: list[map]
+    required: false
+    description: Preconditions that must be satisfied before execution.
+  triggers:
+    type: list[map]
+    required: true
+    description: >
+      Supported activation mechanisms (manual, cron expression, webhook id,
+      etc.).
+  inputs:
+    type: list[map]
+    required: false
+    description: Runtime artefacts that must be provided to execute the canon.
+  actions:
+    type: list[map]
+    required: true
+    description: >
+      Ordered operations that the runtime expands into UTIR, shell, or API
+      invocations. Each entry captures the type, arguments, and expected
+      receipts.
+  postconditions:
+    type: list[map|string]
+    required: true
+    description: Assertions that must hold once execution completes.
+  failure_modes:
+    type: list[map]
+    required: false
+    description: >
+      Known failure patterns with detection heuristics and recovery advice.
+  receipts:
+    type: map
+    required: false
+    description: Where to persist receipts (engine memory, vault mirrors, etc).
+  ablation_knob:
+    type: map
+    required: false
+    description: >
+      Switch that selectively disables the canon to run controlled ablations.
+  upstream_dependencies:
+    type: list[string]
+    required: false
+    description: Other canons or services that must complete first.
+  downstream_consumers:
+    type: list[string]
+    required: false
+    description: Capabilities that depend on this canon’s output.
+  audit_notes:
+    type: list[string]
+    required: false
+    description: Alignment, safety, or security considerations.
+  last_review:
+    type: string
+    required: false
+    description: ISO8601 timestamp of the last human review.
